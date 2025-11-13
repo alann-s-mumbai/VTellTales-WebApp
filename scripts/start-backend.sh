@@ -48,7 +48,7 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Set environment to Development for local testing
-export ASPNETCORE_ENVIRONMENT=Development
+export ASPNETCORE_ENVIRONMENT=LocalDev
 
 # Start the backend API
 dotnet run --urls "http://0.0.0.0:5000"

@@ -1,17 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchStoriesByPage, fetchStoryTypes, StoryData, StoryType } from '../services/api'
+import { Search, Filter, Grid, List, TrendingUp, Clock, Heart, Star } from 'lucide-react'
 
-const landingFilters = ['All Stories', 'Most Popular', 'Recently Added', 'Most Liked']
+const landingFilters = [
+  { id: 'all', label: 'All Stories', icon: Grid },
+  { id: 'popular', label: 'Most Popular', icon: TrendingUp },
+  { id: 'recent', label: 'Recently Added', icon: Clock },
+  { id: 'liked', label: 'Most Liked', icon: Heart }
+]
 
 export function HomePage() {
-  const [selectedFilter, setSelectedFilter] = useState<string>('All Stories')
+  const [selectedFilter, setSelectedFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('All Categories')
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [stories, setStories] = useState<StoryData[]>([])
   const [types, setTypes] = useState<StoryType[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
