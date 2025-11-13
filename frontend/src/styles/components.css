@@ -1,0 +1,424 @@
+/* VtellTales: WebApp Component Library - Base Components */
+
+/* ============================================
+   Button Components
+   ============================================ */
+
+.vtt-button {
+  @apply inline-flex items-center justify-center gap-2;
+  @apply px-4 py-2 rounded-lg font-medium text-sm;
+  @apply transition-all duration-200 ease-in-out;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply border border-transparent;
+  min-height: 2.5rem;
+}
+
+.vtt-button-primary {
+  @apply bg-gradient-to-r from-yellow-400 to-orange-400;
+  @apply text-gray-900 font-semibold;
+  @apply hover:from-yellow-500 hover:to-orange-500;
+  @apply hover:shadow-lg hover:scale-[1.02];
+  @apply focus:ring-yellow-400;
+  @apply active:scale-[0.98];
+}
+
+.vtt-button-secondary {
+  @apply bg-blue-400 text-white;
+  @apply hover:bg-blue-500 hover:shadow-md;
+  @apply focus:ring-blue-400;
+}
+
+.vtt-button-outline {
+  @apply border-gray-300 text-gray-700;
+  @apply hover:bg-gray-50 hover:border-gray-400;
+  @apply focus:ring-gray-300;
+}
+
+.vtt-button-ghost {
+  @apply text-gray-600;
+  @apply hover:bg-gray-100 hover:text-gray-900;
+  @apply focus:ring-gray-300;
+}
+
+.vtt-button-danger {
+  @apply bg-red-500 text-white;
+  @apply hover:bg-red-600 hover:shadow-md;
+  @apply focus:ring-red-500;
+}
+
+.vtt-button-success {
+  @apply bg-green-500 text-white;
+  @apply hover:bg-green-600 hover:shadow-md;
+  @apply focus:ring-green-500;
+}
+
+/* Button Sizes */
+.vtt-button-sm {
+  @apply px-3 py-1.5 text-sm;
+  min-height: 2rem;
+}
+
+.vtt-button-lg {
+  @apply px-6 py-3 text-base;
+  min-height: 3rem;
+}
+
+.vtt-button-xl {
+  @apply px-8 py-4 text-lg;
+  min-height: 3.5rem;
+}
+
+/* Icon Buttons */
+.vtt-button-icon {
+  @apply p-2 aspect-square;
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+}
+
+.vtt-button-icon.vtt-button-sm {
+  @apply p-1.5;
+  min-height: 2rem;
+  min-width: 2rem;
+}
+
+/* ============================================
+   Card Components
+   ============================================ */
+
+.vtt-card {
+  @apply bg-white rounded-xl border border-gray-200;
+  @apply shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+.vtt-card-header {
+  @apply p-6 border-b border-gray-100;
+}
+
+.vtt-card-body {
+  @apply p-6;
+}
+
+.vtt-card-footer {
+  @apply px-6 py-4 bg-gray-50 rounded-b-xl;
+}
+
+.vtt-card-interactive {
+  @apply cursor-pointer hover:scale-[1.02] transition-transform;
+  @apply hover:shadow-lg;
+}
+
+.vtt-card-feature {
+  @apply bg-gradient-to-br from-yellow-50 to-orange-50;
+  @apply border-yellow-200;
+}
+
+/* ============================================
+   Input Components
+   ============================================ */
+
+.vtt-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg;
+  @apply text-gray-900 placeholder-gray-500;
+  @apply focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent;
+  @apply transition-all duration-200;
+  @apply disabled:bg-gray-100 disabled:cursor-not-allowed;
+}
+
+.vtt-input-error {
+  @apply border-red-300 focus:ring-red-400;
+}
+
+.vtt-textarea {
+  @apply vtt-input resize-none min-h-[100px];
+}
+
+.vtt-select {
+  @apply vtt-input pr-10 bg-white;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+}
+
+/* ============================================
+   Form Components
+   ============================================ */
+
+.vtt-form-group {
+  @apply space-y-2;
+}
+
+.vtt-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.vtt-label-required::after {
+  content: " *";
+  @apply text-red-500;
+}
+
+.vtt-error-message {
+  @apply text-sm text-red-600 flex items-center gap-1;
+}
+
+.vtt-help-text {
+  @apply text-sm text-gray-500;
+}
+
+/* ============================================
+   Navigation Components
+   ============================================ */
+
+.vtt-nav-link {
+  @apply flex items-center gap-3 px-4 py-3 rounded-lg;
+  @apply text-gray-600 hover:text-gray-900 hover:bg-gray-50;
+  @apply transition-colors duration-200;
+}
+
+.vtt-nav-link-active {
+  @apply bg-gradient-to-r from-yellow-100 to-orange-100;
+  @apply text-gray-900 font-medium;
+  @apply border-l-4 border-yellow-400;
+}
+
+.vtt-sidebar-nav-button {
+  @apply w-full flex items-center gap-3 px-4 py-3 rounded-xl;
+  @apply text-gray-600 hover:bg-gray-50 transition-colors;
+}
+
+.vtt-sidebar-nav-button.active {
+  @apply bg-gradient-to-r from-yellow-400/20 to-orange-400/20;
+  @apply text-gray-900 shadow-sm;
+}
+
+/* ============================================
+   Badge & Status Components
+   ============================================ */
+
+.vtt-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1;
+  @apply text-xs font-medium rounded-full;
+}
+
+.vtt-badge-primary {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.vtt-badge-secondary {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.vtt-badge-success {
+  @apply bg-green-100 text-green-800;
+}
+
+.vtt-badge-warning {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.vtt-badge-danger {
+  @apply bg-red-100 text-red-800;
+}
+
+.vtt-badge-gray {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* ============================================
+   Loading & State Components
+   ============================================ */
+
+.vtt-spinner {
+  @apply inline-block w-4 h-4 border-2 border-gray-300 rounded-full;
+  border-top-color: theme('colors.yellow.400');
+  animation: vtt-spin 1s linear infinite;
+}
+
+.vtt-skeleton {
+  @apply bg-gray-200 rounded animate-pulse;
+}
+
+.vtt-loading-overlay {
+  @apply fixed inset-0 bg-black/20 flex items-center justify-center z-50;
+}
+
+/* ============================================
+   Modal & Overlay Components
+   ============================================ */
+
+.vtt-modal-backdrop {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50;
+  animation: vtt-fade-in 200ms ease;
+}
+
+.vtt-modal {
+  @apply bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden;
+  animation: vtt-slide-up 300ms ease;
+}
+
+.vtt-modal-header {
+  @apply px-6 py-4 border-b border-gray-200 flex items-center justify-between;
+}
+
+.vtt-modal-body {
+  @apply px-6 py-4 overflow-y-auto;
+}
+
+.vtt-modal-footer {
+  @apply px-6 py-4 border-t border-gray-200 flex justify-end gap-3;
+}
+
+/* ============================================
+   Alert & Notification Components
+   ============================================ */
+
+.vtt-alert {
+  @apply p-4 rounded-lg border-l-4 flex items-start gap-3;
+}
+
+.vtt-alert-info {
+  @apply bg-blue-50 border-blue-400 text-blue-800;
+}
+
+.vtt-alert-success {
+  @apply bg-green-50 border-green-400 text-green-800;
+}
+
+.vtt-alert-warning {
+  @apply bg-orange-50 border-orange-400 text-orange-800;
+}
+
+.vtt-alert-error {
+  @apply bg-red-50 border-red-400 text-red-800;
+}
+
+/* ============================================
+   Table Components
+   ============================================ */
+
+.vtt-table {
+  @apply w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm;
+}
+
+.vtt-table th {
+  @apply bg-gray-50 px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200;
+}
+
+.vtt-table td {
+  @apply px-4 py-3 text-sm text-gray-900 border-b border-gray-100;
+}
+
+.vtt-table tr:hover {
+  @apply bg-gray-50;
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.vtt-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.vtt-section {
+  @apply py-12 lg:py-16;
+}
+
+.vtt-gradient-text {
+  @apply bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent;
+}
+
+.vtt-hover-lift {
+  @apply hover:scale-105 transition-transform duration-200;
+}
+
+.vtt-focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2;
+}
+
+/* ============================================
+   Animation Classes
+   ============================================ */
+
+.vtt-animate-float {
+  animation: vtt-float 3s ease-in-out infinite;
+}
+
+.vtt-animate-bounce-soft {
+  animation: vtt-bounce-soft 1s ease-in-out;
+}
+
+.vtt-animate-fade-in {
+  animation: vtt-fade-in 300ms ease;
+}
+
+.vtt-animate-slide-up {
+  animation: vtt-slide-up 300ms ease;
+}
+
+/* ============================================
+   Custom Keyframes
+   ============================================ */
+
+@keyframes vtt-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes vtt-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes vtt-bounce-soft {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-15px); }
+  70% { transform: translateY(-8px); }
+  90% { transform: translateY(-3px); }
+}
+
+@keyframes vtt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vtt-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   Responsive Utilities
+   ============================================ */
+
+.vtt-hide-mobile {
+  @apply hidden md:block;
+}
+
+.vtt-show-mobile {
+  @apply block md:hidden;
+}
+
+.vtt-grid-responsive {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .vtt-no-print {
+    display: none !important;
+  }
+  
+  .vtt-card {
+    @apply shadow-none border-gray-300;
+  }
+}

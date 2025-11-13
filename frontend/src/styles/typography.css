@@ -1,0 +1,355 @@
+/* VtellTales: WebApp Typography System */
+
+/* ============================================
+   Font Face Declarations
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================
+   Typography Base Styles
+   ============================================ */
+
+.vtt-heading {
+  @apply font-semibold text-gray-900 leading-tight;
+  font-family: var(--vtt-font-heading);
+}
+
+.vtt-heading-1 {
+  @apply vtt-heading text-5xl md:text-6xl;
+  line-height: 1.1;
+}
+
+.vtt-heading-2 {
+  @apply vtt-heading text-4xl md:text-5xl;
+  line-height: 1.15;
+}
+
+.vtt-heading-3 {
+  @apply vtt-heading text-3xl md:text-4xl;
+  line-height: 1.2;
+}
+
+.vtt-heading-4 {
+  @apply vtt-heading text-2xl md:text-3xl;
+  line-height: 1.25;
+}
+
+.vtt-heading-5 {
+  @apply vtt-heading text-xl md:text-2xl;
+  line-height: 1.3;
+}
+
+.vtt-heading-6 {
+  @apply vtt-heading text-lg md:text-xl;
+  line-height: 1.35;
+}
+
+/* ============================================
+   Display Typography
+   ============================================ */
+
+.vtt-display-1 {
+  @apply vtt-heading text-6xl md:text-8xl font-bold;
+  line-height: 0.95;
+}
+
+.vtt-display-2 {
+  @apply vtt-heading text-5xl md:text-7xl font-bold;
+  line-height: 1;
+}
+
+.vtt-display-3 {
+  @apply vtt-heading text-4xl md:text-6xl font-bold;
+  line-height: 1.05;
+}
+
+/* ============================================
+   Body Text Styles
+   ============================================ */
+
+.vtt-text-base {
+  @apply text-base text-gray-700 leading-relaxed;
+  font-family: var(--vtt-font-primary);
+}
+
+.vtt-text-lg {
+  @apply text-lg text-gray-700 leading-relaxed;
+}
+
+.vtt-text-xl {
+  @apply text-xl text-gray-700 leading-relaxed;
+}
+
+.vtt-text-sm {
+  @apply text-sm text-gray-600 leading-normal;
+}
+
+.vtt-text-xs {
+  @apply text-xs text-gray-500 leading-normal;
+}
+
+/* ============================================
+   Lead Text & Subtitles
+   ============================================ */
+
+.vtt-lead {
+  @apply text-xl md:text-2xl text-gray-600 leading-relaxed;
+  font-weight: 400;
+}
+
+.vtt-subtitle {
+  @apply text-lg text-gray-600 leading-relaxed;
+  font-weight: 400;
+}
+
+.vtt-caption {
+  @apply text-sm text-gray-500 leading-normal;
+}
+
+/* ============================================
+   Brand Typography
+   ============================================ */
+
+.vtt-brand-title {
+  @apply vtt-heading-1;
+  background: linear-gradient(135deg, theme('colors.yellow.400'), theme('colors.orange.500'));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vtt-brand-subtitle {
+  @apply vtt-heading-4 text-gray-600;
+}
+
+.vtt-storytelling-text {
+  @apply text-lg leading-loose text-gray-800;
+  font-family: Georgia, 'Times New Roman', serif;
+  text-align: justify;
+}
+
+/* ============================================
+   Interactive Text States
+   ============================================ */
+
+.vtt-link {
+  @apply text-blue-600 hover:text-blue-800 underline decoration-2 underline-offset-2;
+  @apply transition-colors duration-200;
+}
+
+.vtt-link-brand {
+  @apply text-yellow-600 hover:text-yellow-800;
+}
+
+.vtt-link-subtle {
+  @apply text-gray-600 hover:text-gray-900 no-underline hover:underline;
+}
+
+/* ============================================
+   List Styles
+   ============================================ */
+
+.vtt-list {
+  @apply space-y-2;
+}
+
+.vtt-list-disc {
+  @apply vtt-list list-disc pl-5;
+}
+
+.vtt-list-decimal {
+  @apply vtt-list list-decimal pl-5;
+}
+
+.vtt-list-none {
+  @apply vtt-list list-none pl-0;
+}
+
+.vtt-list-check {
+  @apply vtt-list-none;
+}
+
+.vtt-list-check li {
+  @apply flex items-start gap-3;
+}
+
+.vtt-list-check li::before {
+  content: "✓";
+  @apply text-green-500 font-bold mt-0.5;
+}
+
+/* ============================================
+   Code & Monospace
+   ============================================ */
+
+.vtt-code {
+  @apply bg-gray-100 text-gray-800 px-2 py-1 rounded text-sm;
+  font-family: var(--vtt-font-mono);
+}
+
+.vtt-pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto;
+  font-family: var(--vtt-font-mono);
+}
+
+/* ============================================
+   Text Alignment
+   ============================================ */
+
+.vtt-text-left { @apply text-left; }
+.vtt-text-center { @apply text-center; }
+.vtt-text-right { @apply text-right; }
+.vtt-text-justify { @apply text-justify; }
+
+/* ============================================
+   Text Colors
+   ============================================ */
+
+.vtt-text-primary { @apply text-gray-900; }
+.vtt-text-secondary { @apply text-gray-600; }
+.vtt-text-muted { @apply text-gray-500; }
+.vtt-text-accent { @apply text-yellow-600; }
+.vtt-text-success { @apply text-green-600; }
+.vtt-text-warning { @apply text-orange-600; }
+.vtt-text-error { @apply text-red-600; }
+.vtt-text-info { @apply text-blue-600; }
+
+/* ============================================
+   Text Transforms
+   ============================================ */
+
+.vtt-uppercase { @apply uppercase tracking-wider; }
+.vtt-lowercase { @apply lowercase; }
+.vtt-capitalize { @apply capitalize; }
+.vtt-normal-case { @apply normal-case; }
+
+/* ============================================
+   Text Decorations
+   ============================================ */
+
+.vtt-underline { @apply underline decoration-2 underline-offset-4; }
+.vtt-line-through { @apply line-through; }
+.vtt-no-underline { @apply no-underline; }
+
+/* ============================================
+   Font Weights
+   ============================================ */
+
+.vtt-font-light { font-weight: var(--vtt-font-light); }
+.vtt-font-regular { font-weight: var(--vtt-font-regular); }
+.vtt-font-medium { font-weight: var(--vtt-font-medium); }
+.vtt-font-semibold { font-weight: var(--vtt-font-semibold); }
+.vtt-font-bold { font-weight: var(--vtt-font-bold); }
+.vtt-font-extrabold { font-weight: var(--vtt-font-extrabold); }
+
+/* ============================================
+   Line Heights
+   ============================================ */
+
+.vtt-leading-tight { line-height: var(--vtt-leading-tight); }
+.vtt-leading-snug { line-height: var(--vtt-leading-snug); }
+.vtt-leading-normal { line-height: var(--vtt-leading-normal); }
+.vtt-leading-relaxed { line-height: var(--vtt-leading-relaxed); }
+.vtt-leading-loose { line-height: var(--vtt-leading-loose); }
+
+/* ============================================
+   Responsive Typography
+   ============================================ */
+
+.vtt-responsive-text {
+  @apply text-sm md:text-base lg:text-lg;
+}
+
+.vtt-responsive-heading {
+  @apply text-2xl md:text-3xl lg:text-4xl;
+}
+
+.vtt-responsive-display {
+  @apply text-4xl md:text-5xl lg:text-6xl xl:text-7xl;
+}
+
+/* ============================================
+   Special Effects
+   ============================================ */
+
+.vtt-text-shadow {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.vtt-text-shadow-lg {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.vtt-text-glow {
+  text-shadow: 0 0 20px rgba(243, 214, 87, 0.6);
+}
+
+.vtt-text-gradient {
+  background: linear-gradient(135deg, theme('colors.yellow.400'), theme('colors.orange.500'));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.vtt-text-gradient-blue {
+  background: linear-gradient(135deg, theme('colors.blue.400'), theme('colors.blue.600'));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ============================================
+   Content-Specific Typography
+   ============================================ */
+
+.vtt-story-title {
+  @apply vtt-heading-3 text-gray-900 mb-4;
+}
+
+.vtt-story-content {
+  @apply vtt-storytelling-text space-y-4;
+}
+
+.vtt-story-content p {
+  @apply mb-4 last:mb-0;
+}
+
+.vtt-story-content h1 { @apply vtt-heading-2 mt-8 mb-4 first:mt-0; }
+.vtt-story-content h2 { @apply vtt-heading-3 mt-6 mb-3; }
+.vtt-story-content h3 { @apply vtt-heading-4 mt-5 mb-2; }
+.vtt-story-content h4 { @apply vtt-heading-5 mt-4 mb-2; }
+.vtt-story-content h5 { @apply vtt-heading-6 mt-3 mb-1; }
+
+.vtt-story-content blockquote {
+  @apply border-l-4 border-yellow-400 pl-4 italic text-gray-600 my-6;
+}
+
+/* ============================================
+   Accessibility
+   ============================================ */
+
+.vtt-sr-only {
+  @apply sr-only;
+}
+
+.vtt-focus-visible {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .vtt-text-gradient,
+  .vtt-text-gradient-blue {
+    -webkit-text-fill-color: unset;
+    background: unset;
+    @apply text-gray-900;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .vtt-text-glow {
+    text-shadow: none;
+  }
+}

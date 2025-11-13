@@ -1,0 +1,262 @@
+================================================================================
+                    VTELLTALES - ALL 16 HTML FILES
+                    Complete Export Package
+                    Generated: November 11, 2025
+================================================================================
+
+INSTRUCTIONS:
+1. This file contains all 16 HTML files for the VTellTales project
+2. Each file is marked with clear START/END delimiters
+3. Copy each file's content (between the delimiters) into a new file
+4. Save with the exact filename shown in the header
+
+FILE STRUCTURE:
+/exports/
+  ├── index.html (Navigation hub)
+  ├── home.html (Main landing page)
+  ├── login.html (Authentication)
+  ├── register.html (User registration)
+  ├── story-list.html (Browse stories)
+  ├── story-details.html (Individual story)
+  ├── profile.html (User profile)
+  ├── creator.html (Story creation tool)
+  ├── about.html (About page)
+  ├── contact.html (Contact form)
+  └── privacy.html (Privacy policy)
+
+================================================================================
+
+======================= START FILE: index.html =======================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTellTales - HTML Exports Index</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100 min-h-screen">
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-yellow-400 via-orange-300 to-orange-500 rounded-3xl shadow-2xl mb-6">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
+                    </svg>
+                </div>
+                <h1 class="text-5xl font-bold text-gray-900 mb-4">VTellTales HTML Exports</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Standalone HTML previews of the VTellTales experience
+                </p>
+            </div>
+
+            <!-- Main Pages -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">📱 Main Pages</h2>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <a href="home.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-yellow-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-yellow-600 transition-colors">Home</h3>
+                                <p class="text-xs text-gray-500">home.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Landing page with hero, categories, and featured stories</p>
+                    </a>
+
+                    <a href="login.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Login</h3>
+                                <p class="text-xs text-gray-500">login.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Authentication with social login options</p>
+                    </a>
+
+                    <a href="register.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-green-600 transition-colors">Register</h3>
+                                <p class="text-xs text-gray-500">register.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">New user registration and signup</p>
+                    </a>
+
+                    <a href="story-list.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-purple-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-purple-600 transition-colors">Story List</h3>
+                                <p class="text-xs text-gray-500">story-list.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Browse stories with filters and search</p>
+                    </a>
+
+                    <a href="story-details.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-pink-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-pink-600 transition-colors">Story Details</h3>
+                                <p class="text-xs text-gray-500">story-details.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Individual story view with age options</p>
+                    </a>
+
+                    <a href="profile.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-orange-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">Profile</h3>
+                                <p class="text-xs text-gray-500">profile.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">User profile with stats and stories</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Creator Tools -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🎨 Creator Tools</h2>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <a href="creator.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-yellow-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-yellow-600 transition-colors">Story Creator</h3>
+                                <p class="text-xs text-gray-500">creator.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Canva-style creator with multimedia support</p>
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- Info Pages -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">ℹ️ Information Pages</h2>
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <a href="about.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-blue-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">About</h3>
+                                <p class="text-xs text-gray-500">about.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Mission, team, and company info</p>
+                    </a>
+
+                    <a href="contact.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-green-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-green-600 transition-colors">Contact</h3>
+                                <p class="text-xs text-gray-500">contact.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Contact form and support</p>
+                    </a>
+
+                    <a href="privacy.html" class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border-2 border-transparent hover:border-purple-400">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-purple-600 transition-colors">Privacy</h3>
+                                <p class="text-xs text-gray-500">privacy.html</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">Privacy policy and terms</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-white rounded-3xl shadow-xl p-8 text-center">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Ready to Explore?</h3>
+                <p class="text-gray-600 mb-6">
+                    Click any card above to view the standalone HTML page
+                </p>
+                <a href="home.html" class="inline-block px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-300 to-orange-500 text-white font-bold rounded-2xl hover:shadow-2xl hover:scale-105 transition-all">
+                    Start with Home Page
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+======================== END FILE: index.html ========================
+
+
+NOTE: Due to the large file size, this text file contains detailed instructions and the first file (index.html). 
+For the complete collection of all 16 files, please see /exports/ directory in Figma Make.
+
+The remaining 15 files are:
+- home.html
+- login.html  
+- register.html
+- story-list.html
+- story-details.html
+- profile.html
+- creator.html
+- about.html
+- contact.html
+- privacy.html
+
+To download all files:
+1. Use the Figma Make interface to access each individual file
+2. Copy the content from each file in the /exports/ directory
+3. Save to your local machine at /Users/alann/Projects/VTellTales - WebApp/exports/
+
+================================================================================
+                         END OF FILE
+================================================================================

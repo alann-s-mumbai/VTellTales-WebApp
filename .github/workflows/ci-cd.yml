@@ -1,0 +1,484 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+env:
+  NODE_VERSION: '18'
+  DOTNET_VERSION: '8.0.x'
+  # Optional deployment secrets - configure in repository settings for full functionality
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME || 'vtelltales' }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  STAGING_HOST: ${{ secrets.STAGING_HOST || 'staging.vtelltales.com' }}
+  STAGING_USERNAME: ${{ secrets.STAGING_USERNAME || 'deploy' }}
+  STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+  STAGING_PORT: ${{ secrets.STAGING_PORT || '22' }}
+  PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST || '94.136.189.179' }}
+  PRODUCTION_USERNAME: ${{ secrets.PRODUCTION_USERNAME || 'root' }}
+  PRODUCTION_SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+  PRODUCTION_PORT: ${{ secrets.PRODUCTION_PORT || '22' }}
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  # Frontend Tests
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+  # Backend Tests
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend/VTellTalesCore
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: vTT@2021#
+          MYSQL_DATABASE: VTellTales_Web_db
+          MYSQL_USER: lhzpvxok_admin
+          MYSQL_PASSWORD: vTT@2021#
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --logger trx --results-directory TestResults
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: backend/VTellTalesCore/TestResults/*/coverage.cobertura.xml
+          flags: backend
+          name: backend-coverage
+
+      - name: Publish test results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Backend Test Results
+          path: backend/VTellTalesCore/TestResults/*.trx
+          reporter: dotnet-trx
+
+  # Security Scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # End-to-End Tests
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests]
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: VTellTales_Web_db
+          MYSQL_USER: vtelltales
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build backend
+        run: |
+          cd backend/VTellTalesCore
+          dotnet build --configuration Release
+
+      - name: Start backend
+        run: |
+          cd backend/VTellTalesCore/VTellTales_WA.API
+          dotnet run --configuration Release --no-build --urls "http://0.0.0.0:5000" &
+          
+      - name: Wait for backend to be ready
+        run: |
+          timeout 60s bash -c 'until curl -f http://localhost:5000/health; do sleep 2; done'
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: |
+          cd frontend
+          npx playwright test
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 30
+
+  # Build and Push Docker Images
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [frontend-tests, backend-tests, security-scan]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            vtelltales/frontend
+            vtelltales/backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          push: true
+          tags: vtelltales/frontend:${{ github.sha }},vtelltales/frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/VTellTalesCore
+          file: ./backend/VTellTalesCore/Dockerfile.prod
+          push: true
+          tags: vtelltales/backend:${{ github.sha }},vtelltales/backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-images, e2e-tests]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ env.STAGING_HOST }}
+          username: ${{ env.STAGING_USERNAME }}
+          key: ${{ env.STAGING_SSH_KEY }}
+          port: ${{ env.STAGING_PORT }}
+          script: |
+            cd /opt/vtelltales-staging
+            
+            # Pull latest images
+            docker-compose -f docker-compose.staging.yml pull
+            
+            # Update and restart services
+            docker-compose -f docker-compose.staging.yml up -d --remove-orphans
+            
+            # Clean up old images
+            docker system prune -f
+            
+            # Wait for services to be healthy
+            timeout 120s bash -c 'until curl -f http://localhost/health; do sleep 5; done'
+            
+            echo "Staging deployment completed successfully"
+
+      - name: Run smoke tests on staging
+        run: |
+          # Wait for staging to be ready
+          sleep 30
+          
+          # Run basic health checks
+          curl -f https://staging.vtelltales.com/health
+          curl -f https://staging.vtelltales.com/storyapi/health
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-images, e2e-tests]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create deployment backup
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ env.PRODUCTION_HOST }}
+          username: ${{ env.PRODUCTION_USERNAME }}
+          key: ${{ env.PRODUCTION_SSH_KEY }}
+          port: ${{ env.PRODUCTION_PORT }}
+          script: |
+            cd /opt/vtelltales-production
+            
+            # Create database backup before deployment
+            docker-compose -f docker-compose.prod.yml exec -T mysql \
+              mysqldump -u vtelltales -p$DB_PASSWORD VTellTales_Web_db | \
+              gzip > /backups/pre_deploy_$(date +%Y%m%d_%H%M%S).sql.gz
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ env.PRODUCTION_HOST }}
+          username: ${{ env.PRODUCTION_USERNAME }}
+          key: ${{ env.PRODUCTION_SSH_KEY }}
+          port: ${{ env.PRODUCTION_PORT }}
+          script: |
+            cd /opt/vtelltales-production
+            
+            # Pull latest images
+            docker-compose -f docker-compose.prod.yml pull
+            
+            # Update backend first (zero-downtime deployment)
+            docker-compose -f docker-compose.prod.yml up -d backend --remove-orphans
+            
+            # Wait for backend to be healthy
+            timeout 60s bash -c 'until curl -f http://localhost:5000/health; do sleep 2; done'
+            
+            # Update frontend
+            docker-compose -f docker-compose.prod.yml up -d frontend nginx --remove-orphans
+            
+            # Wait for services to be ready
+            timeout 120s bash -c 'until curl -f https://vtelltales.com/health; do sleep 5; done'
+            
+            # Clean up old images
+            docker system prune -f
+            
+            echo "Production deployment completed successfully"
+
+      - name: Run production health checks
+        run: |
+          # Wait for production to be ready
+          sleep 30
+          
+          # Run comprehensive health checks
+          curl -f https://vtelltales.com/health
+          curl -f https://vtelltales.com/storyapi/health
+          
+          # Test key user flows
+          curl -f https://vtelltales.com/
+          curl -f https://vtelltales.com/storyapi/storytypes
+
+      - name: Notify deployment success
+        uses: 8398a7/action-slack@v3
+        if: success()
+        with:
+          status: success
+          channel: '#deployments'
+          text: |
+            :rocket: Production deployment successful!
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            Branch: ${{ github.ref_name }}
+
+      - name: Notify deployment failure
+        uses: 8398a7/action-slack@v3
+        if: failure()
+        with:
+          status: failure
+          channel: '#alerts'
+          text: |
+            :warning: Production deployment failed!
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+            Branch: ${{ github.ref_name }}
+            Please check the deployment logs.
+
+  # Create Release
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          
+          # Generate changelog since last tag
+          CHANGELOG=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          
+          # Create version number
+          VERSION=$(date +%Y.%m.%d)-$(git rev-parse --short HEAD)
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ steps.release_notes.outputs.version }}
+          release_name: Release v${{ steps.release_notes.outputs.version }}
+          body: |
+            ## Changes in this release
+            
+            ${{ steps.release_notes.outputs.changelog }}
+            
+            ## Docker Images
+            
+            - Frontend: `vtelltales/frontend:${{ github.sha }}`
+            - Backend: `vtelltales/backend:${{ github.sha }}`
+            
+            ## Deployment
+            
+            This release has been automatically deployed to production.
+          draft: false
+          prerelease: false
+
+  # Cleanup
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: always()
+
+    steps:
+      - name: Clean up old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          retain_days: 30
+          keep_minimum_runs: 5

@@ -1,0 +1,407 @@
+/* VtellTales: WebApp Layout System */
+
+/* ============================================
+   Container & Grid System
+   ============================================ */
+
+.vtt-container {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.vtt-container-sm {
+  @apply w-full max-w-2xl mx-auto px-4 sm:px-6;
+}
+
+.vtt-container-lg {
+  @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.vtt-container-fluid {
+  @apply w-full px-4 sm:px-6 lg:px-8;
+}
+
+/* ============================================
+   Grid Systems
+   ============================================ */
+
+.vtt-grid {
+  @apply grid gap-6;
+}
+
+.vtt-grid-1 { @apply grid-cols-1; }
+.vtt-grid-2 { @apply grid-cols-1 md:grid-cols-2; }
+.vtt-grid-3 { @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3; }
+.vtt-grid-4 { @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-4; }
+.vtt-grid-5 { @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5; }
+.vtt-grid-6 { @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6; }
+
+.vtt-grid-auto {
+  @apply grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6;
+}
+
+.vtt-grid-story {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+/* ============================================
+   Flexbox Utilities
+   ============================================ */
+
+.vtt-flex-center {
+  @apply flex items-center justify-center;
+}
+
+.vtt-flex-between {
+  @apply flex items-center justify-between;
+}
+
+.vtt-flex-start {
+  @apply flex items-center justify-start;
+}
+
+.vtt-flex-end {
+  @apply flex items-center justify-end;
+}
+
+.vtt-flex-col-center {
+  @apply flex flex-col items-center justify-center;
+}
+
+.vtt-flex-col-start {
+  @apply flex flex-col items-start justify-start;
+}
+
+/* ============================================
+   Section Layouts
+   ============================================ */
+
+.vtt-section {
+  @apply py-12 lg:py-16 xl:py-20;
+}
+
+.vtt-section-sm {
+  @apply py-8 lg:py-10;
+}
+
+.vtt-section-lg {
+  @apply py-16 lg:py-20 xl:py-24;
+}
+
+.vtt-hero-section {
+  @apply min-h-screen flex items-center justify-center py-20;
+}
+
+.vtt-content-section {
+  @apply vtt-section max-w-4xl mx-auto;
+}
+
+/* ============================================
+   Header & Navigation Layouts
+   ============================================ */
+
+.vtt-header {
+  @apply sticky top-0 z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60;
+  @apply border-b border-gray-200;
+}
+
+.vtt-navbar {
+  @apply vtt-container vtt-flex-between py-4;
+}
+
+.vtt-nav-menu {
+  @apply hidden md:flex items-center space-x-8;
+}
+
+.vtt-mobile-menu {
+  @apply md:hidden;
+}
+
+/* ============================================
+   Sidebar Layouts
+   ============================================ */
+
+.vtt-layout-with-sidebar {
+  @apply flex min-h-screen bg-gray-50;
+}
+
+.vtt-sidebar {
+  @apply hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0;
+  @apply bg-white border-r border-gray-200;
+}
+
+.vtt-sidebar-content {
+  @apply flex-1 flex flex-col pt-5 pb-4 overflow-y-auto;
+}
+
+.vtt-sidebar-nav {
+  @apply flex-1 px-4 space-y-1;
+}
+
+.vtt-main-with-sidebar {
+  @apply md:pl-64 flex flex-col flex-1;
+}
+
+/* ============================================
+   Dashboard Layouts
+   ============================================ */
+
+.vtt-dashboard-header {
+  @apply bg-white shadow-sm border-b border-gray-200;
+}
+
+.vtt-dashboard-content {
+  @apply flex-1 p-6 lg:p-8;
+}
+
+.vtt-dashboard-grid {
+  @apply vtt-grid vtt-grid-auto;
+}
+
+.vtt-stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+}
+
+/* ============================================
+   Card Layouts
+   ============================================ */
+
+.vtt-card-grid {
+  @apply vtt-grid vtt-grid-story;
+}
+
+.vtt-feature-card {
+  @apply vtt-card p-6 text-center hover:shadow-lg transition-shadow;
+}
+
+.vtt-story-card {
+  @apply vtt-card overflow-hidden hover:shadow-lg transition-all duration-200;
+  @apply hover:scale-[1.02];
+}
+
+.vtt-story-card-image {
+  @apply aspect-[4/3] bg-gray-100 overflow-hidden;
+}
+
+.vtt-story-card-content {
+  @apply p-6 space-y-3;
+}
+
+/* ============================================
+   Form Layouts
+   ============================================ */
+
+.vtt-form {
+  @apply space-y-6;
+}
+
+.vtt-form-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+.vtt-form-actions {
+  @apply flex flex-col sm:flex-row gap-3 sm:justify-end;
+}
+
+.vtt-form-section {
+  @apply space-y-4;
+}
+
+.vtt-form-group {
+  @apply space-y-2;
+}
+
+.vtt-form-inline {
+  @apply flex flex-col sm:flex-row gap-3 items-start sm:items-center;
+}
+
+/* ============================================
+   Content Layouts
+   ============================================ */
+
+.vtt-content {
+  @apply max-w-4xl mx-auto prose prose-gray prose-lg;
+}
+
+.vtt-article {
+  @apply vtt-content px-6 py-8;
+}
+
+.vtt-two-column {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-8 items-start;
+}
+
+.vtt-three-column {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+}
+
+/* ============================================
+   Modal & Overlay Layouts
+   ============================================ */
+
+.vtt-modal-container {
+  @apply fixed inset-0 z-50 overflow-y-auto;
+}
+
+.vtt-modal-backdrop {
+  @apply fixed inset-0 bg-black/50 transition-opacity;
+}
+
+.vtt-modal-wrapper {
+  @apply min-h-full flex items-center justify-center p-4 text-center sm:p-0;
+}
+
+.vtt-modal-panel {
+  @apply relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl;
+  @apply transition-all w-full max-w-lg;
+}
+
+/* ============================================
+   Footer Layouts
+   ============================================ */
+
+.vtt-footer {
+  @apply bg-gray-900 text-white;
+}
+
+.vtt-footer-content {
+  @apply vtt-container py-12;
+}
+
+.vtt-footer-grid {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-8;
+}
+
+.vtt-footer-bottom {
+  @apply vtt-container py-6 border-t border-gray-700;
+  @apply flex flex-col md:flex-row justify-between items-center gap-4;
+}
+
+/* ============================================
+   Responsive Utilities
+   ============================================ */
+
+.vtt-mobile-only {
+  @apply block md:hidden;
+}
+
+.vtt-desktop-only {
+  @apply hidden md:block;
+}
+
+.vtt-tablet-up {
+  @apply hidden sm:block;
+}
+
+.vtt-mobile-landscape {
+  @apply block landscape:hidden;
+}
+
+/* ============================================
+   Spacing Utilities
+   ============================================ */
+
+.vtt-space-y-section > * + * {
+  @apply mt-12 lg:mt-16;
+}
+
+.vtt-space-y-content > * + * {
+  @apply mt-6;
+}
+
+.vtt-space-x-nav > * + * {
+  @apply ml-6 lg:ml-8;
+}
+
+/* ============================================
+   Print Layouts
+   ============================================ */
+
+@media print {
+  .vtt-no-print {
+    @apply hidden;
+  }
+  
+  .vtt-print-break {
+    page-break-after: always;
+  }
+  
+  .vtt-print-avoid-break {
+    page-break-inside: avoid;
+  }
+  
+  .vtt-sidebar {
+    @apply hidden;
+  }
+  
+  .vtt-main-with-sidebar {
+    @apply pl-0;
+  }
+}
+
+/* ============================================
+   Accessibility Layouts
+   ============================================ */
+
+.vtt-skip-link {
+  @apply sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50;
+  @apply bg-yellow-400 text-gray-900 px-4 py-2 rounded-md font-medium;
+}
+
+.vtt-focus-trap {
+  @apply focus:outline-none;
+}
+
+/* ============================================
+   Animation Containers
+   ============================================ */
+
+.vtt-animate-container {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.vtt-hover-container {
+  @apply hover:scale-105 transition-transform duration-200;
+}
+
+.vtt-loading-container {
+  @apply opacity-50 pointer-events-none transition-opacity;
+}
+
+/* ============================================
+   Scroll Utilities
+   ============================================ */
+
+.vtt-scroll-smooth {
+  @apply scroll-smooth;
+}
+
+.vtt-scroll-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.vtt-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.vtt-scroll-styled {
+  scrollbar-width: thin;
+  scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+}
+
+.vtt-scroll-styled::-webkit-scrollbar {
+  width: 6px;
+}
+
+.vtt-scroll-styled::-webkit-scrollbar-track {
+  background: theme('colors.gray.100');
+}
+
+.vtt-scroll-styled::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.400');
+  border-radius: 3px;
+}
+
+.vtt-scroll-styled::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.500');
+}

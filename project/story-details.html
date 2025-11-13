@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTellTales - Story Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Top Bar -->
+    <nav class="bg-white border-b border-gray-100 fixed top-0 left-0 right-0 z-50">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="story-list.html" class="p-2 rounded-xl hover:bg-gray-100">
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+
+                <div class="flex items-center gap-2">
+                    <button class="p-2 rounded-xl hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                        </svg>
+                    </button>
+                    <button class="p-2 rounded-xl hover:bg-gray-100">
+                        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-16 pb-24">
+        <!-- Hero Image -->
+        <div class="h-64 sm:h-96 bg-gradient-to-br from-purple-400 via-pink-500 to-orange-400 relative">
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-9xl">🏰</span>
+            </div>
+        </div>
+
+        <!-- Story Info -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8">
+                <!-- Category Badge -->
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">Adventure</span>
+                    <span class="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">Ages 5-7</span>
+                </div>
+
+                <!-- Title -->
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">The Magical Castle Adventure</h1>
+
+                <!-- Author Info -->
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full"></div>
+                    <div>
+                        <p class="font-semibold text-gray-900">Teacher Sarah</p>
+                        <p class="text-sm text-gray-500">Published 2 days ago</p>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4 py-6 border-y border-gray-200 mb-6">
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-2 text-2xl font-bold text-gray-900 mb-1">
+                            <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            15.2K
+                        </div>
+                        <p class="text-sm text-gray-500">Views</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-2 text-2xl font-bold text-gray-900 mb-1">
+                            <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                            </svg>
+                            2.4K
+                        </div>
+                        <p class="text-sm text-gray-500">Likes</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-2 text-2xl font-bold text-gray-900 mb-1">
+                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            12
+                        </div>
+                        <p class="text-sm text-gray-500">Pages</p>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-3">About this story</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Join Princess Luna on an exciting adventure through the magical castle! 
+                        Discover hidden rooms, meet friendly dragons, and solve ancient puzzles. 
+                        This interactive story teaches children about friendship, courage, and problem-solving 
+                        while keeping them engaged with beautiful illustrations and fun activities.
+                    </p>
+                </div>
+
+                <!-- Read Options -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Choose Your Reading Experience</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <a href="viewer-3-5.html" class="group p-6 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl border-2 border-pink-200 hover:shadow-lg transition-all">
+                            <div class="text-4xl mb-3">👶</div>
+                            <h3 class="font-bold text-gray-900 mb-2">Ages 3-5</h3>
+                            <p class="text-sm text-gray-600">Large pictures, minimal text</p>
+                        </a>
+
+                        <a href="viewer-5-7.html" class="group p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border-2 border-blue-200 hover:shadow-lg transition-all">
+                            <div class="text-4xl mb-3">🧒</div>
+                            <h3 class="font-bold text-gray-900 mb-2">Ages 5-7</h3>
+                            <p class="text-sm text-gray-600">Balanced story & images</p>
+                        </a>
+
+                        <a href="viewer-7-10.html" class="group p-6 bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl border-2 border-green-200 hover:shadow-lg transition-all">
+                            <div class="text-4xl mb-3">👦</div>
+                            <h3 class="font-bold text-gray-900 mb-2">Ages 7-10</h3>
+                            <p class="text-sm text-gray-600">Comic book style</p>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold text-gray-900 mb-3">Tags</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">#adventure</span>
+                        <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">#magic</span>
+                        <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">#castle</span>
+                        <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">#princess</span>
+                        <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">#educational</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button class="flex-1 py-4 bg-gradient-to-r from-yellow-400 via-orange-300 to-orange-500 text-white font-bold rounded-2xl hover:shadow-2xl transition-all">
+                        Read Now
+                    </button>
+                    <button class="px-6 py-4 bg-gray-100 text-gray-900 font-semibold rounded-2xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        Like
+                    </button>
+                    <button class="px-6 py-4 bg-gray-100 text-gray-900 font-semibold rounded-2xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                        Save
+                    </button>
+                </div>
+            </div>
+
+            <!-- Related Stories -->
+            <div class="mt-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">More from Teacher Sarah</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <a href="story-details.html" class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
+                        <div class="h-40 bg-gradient-to-br from-green-400 to-teal-500"></div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-900 mb-2">The Enchanted Forest</h3>
+                            <p class="text-sm text-gray-500">8 pages • 5.2K views</p>
+                        </div>
+                    </a>
+
+                    <a href="story-details.html" class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
+                        <div class="h-40 bg-gradient-to-br from-blue-400 to-purple-500"></div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-900 mb-2">Ocean Adventure</h3>
+                            <p class="text-sm text-gray-500">10 pages • 7.8K views</p>
+                        </div>
+                    </a>
+
+                    <a href="story-details.html" class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
+                        <div class="h-40 bg-gradient-to-br from-yellow-400 to-orange-500"></div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-900 mb-2">Sunny Day Friends</h3>
+                            <p class="text-sm text-gray-500">6 pages • 3.1K views</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom CTA -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 shadow-lg lg:hidden">
+        <button class="w-full py-4 bg-gradient-to-r from-yellow-400 via-orange-300 to-orange-500 text-white font-bold rounded-2xl">
+            Start Reading
+        </button>
+    </div>
+</body>
+</html>
