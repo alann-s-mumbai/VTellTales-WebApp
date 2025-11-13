@@ -14,10 +14,25 @@ import { AboutPage } from './pages/AboutPage'
 import { ContactPage } from './pages/ContactPage'
 import { PrivacyPage } from './pages/PrivacyPage'
 import StyleEditorPage from './pages/StyleEditorPage'
+import PWAManager from './components/PWAManager'
+import { PWAService } from './services/PWAService'
+import { useEffect } from 'react'
 
 function App() {
+  useEffect(() => {
+    // Initialize PWA service
+    const initPWA = async () => {
+      const pwa = PWAService.getInstance();
+      await pwa.init();
+      pwa.setupInstallPrompt();
+    };
+    
+    initPWA();
+  }, []);
+
   return (
     <Router>
+      <PWAManager />
       <Routes>
         {/* Auth routes without main layout */}
         <Route path="/login" element={<LoginPage />} />

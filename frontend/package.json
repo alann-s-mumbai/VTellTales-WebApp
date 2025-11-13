@@ -1,7 +1,7 @@
 {
   "name": "vtelltales-webapp-frontend",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000",
@@ -18,6 +18,9 @@
     "firebase": "^12.5.0",
     "framer-motion": "^10.16.0",
     "lucide-react": "^0.294.0",
+    "recharts": "^2.8.0",
+    "workbox-webpack-plugin": "^7.0.0",
+    "web-vitals": "^3.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
