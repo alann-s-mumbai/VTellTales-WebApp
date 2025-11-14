@@ -10,12 +10,12 @@ namespace VTellTales_WA.BL.Interfaces
         int SaveProfile(ProfileDataDTO profileDataDTO);
         int UpdateProfile(ProfileDataDTO proflieDataDTO);
         string updateToken(string userid, string token);
-    ProfileDataDTO? GetOtherProfile(string userID, string followingid);
-    ProfileDataDTO? GetProfile(string userID);
-    PushNotificationDTO? GetProfileName(string userID, string sendto);
+        ProfileDataDTO? GetOtherProfile(string userID, string followingid);
+        ProfileDataDTO? GetProfile(string userID);
+        PushNotificationDTO? GetProfileName(string userID, string sendto);
         List<PushNotificationDTO> GetNotificationuserlist(string userID);
         int checkuser(string email);
-    ProfileDataDTO? getToken(string userID);
+        ProfileDataDTO? getToken(string userID);
         List<ProfileDataDTO> GetProfilelist(string userID);
         List<NotificationDTO> Getallnotifications(string userID);
         int unreadnotifications(string userID);
@@ -28,6 +28,13 @@ namespace VTellTales_WA.BL.Interfaces
         bool CheckUserExists(string email);
         ProfileDataDTO? GetUserByEmail(string email);
 
+        // Enhanced Profile Methods
+        bool CheckUsernameAvailability(string username);
+        bool CompleteProfile(UpdateProfileDTO profileData);
+        string GenerateEmailVerificationToken(string userId);
+        bool VerifyEmail(string token, string ipAddress = null, string userAgent = null);
+        bool ResendVerificationEmail(string email);
+        bool ChangePassword(string userId, string currentPassword, string newPassword);
         //Admin
         List<ProfileDataDTO> Getallusers();
         List<ProfileADataDTO> GetallusersTest();

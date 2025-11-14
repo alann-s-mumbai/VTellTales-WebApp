@@ -1879,6 +1879,17 @@ namespace VTellTales_WA.API.Controllers
             {
                 IProfileDataBL profileDataBL = new ProfileDataBL(configuration);
                 var result = profileDataBL.LoginUser(loginRequest);
+                
+                // Store user in session if login successful
+                if (result.Success && result.User != null)
+                {
+                    HttpContext.Session.SetString("UserId", result.User.Id ?? "");
+                    HttpContext.Session.SetString("UserEmail", result.User.Email ?? "");
+                    HttpContext.Session.SetString("UserName", result.User.Name ?? "");
+                    HttpContext.Session.SetString("IsEmailVerified", result.User.IsEmailVerified.ToString());
+                    HttpContext.Session.SetString("IsProfileComplete", result.User.IsProfileComplete.ToString());
+                }
+                
                 return Json(result);
             }
             catch (Exception ex)
@@ -1899,6 +1910,26 @@ namespace VTellTales_WA.API.Controllers
             {
                 IProfileDataBL profileDataBL = new ProfileDataBL(configuration);
                 var result = profileDataBL.RegisterUser(registerRequest);
+                
+                // Store user in session if registration successful
+                if (result.Success && result.User != null)
+                {
+                    HttpContext.Session.SetString("UserId", result.User.Id ?? "");
+                    HttpContext.Session.SetString("UserEmail", result.User.Email ?? "");
+                    HttpContext.Session.SetString("UserName", result.User.Name ?? "");
+                    HttpContext.Session.SetString("IsEmailVerified", result.User.IsEmailVerified.ToString());
+                    HttpContext.Session.SetString("IsProfileComplete", result.User.IsProfileComplete.ToString());
+
+                    // Generate email verification token
+                    var token = profileDataBL.GenerateEmailVerificationToken(result.User.Id);
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        // TODO: Send verification email
+                        // EmailService.SendVerificationEmail(result.User.Email, token);
+                        result.RequiresEmailVerification = true;
+                    }
+                }
+                
                 return Json(result);
             }
             catch (Exception ex)
@@ -1925,6 +1956,217 @@ namespace VTellTales_WA.API.Controllers
             {
                 _logger.LogError(ex, "Error in CheckUserExists");
                 return Json(new CheckUserExistsDTO { Exists = false });
+            }
+        }
+
+        [HttpGet("GetCurrentUser")]
+        public JsonResult GetCurrentUser()
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserId");
+                var userEmail = HttpContext.Session.GetString("UserEmail");
+                var userName = HttpContext.Session.GetString("UserName");
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new AuthResponseDTO
+                    {
+                        Success = false,
+                        Message = "No active session"
+                    });
+                }
+
+                return Json(new AuthResponseDTO
+                {
+                    Success = true,
+                    User = new UserDTO
+                    {
+                        Id = userId,
+                        Email = userEmail,
+                        Name = userName
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetCurrentUser");
+                return Json(new AuthResponseDTO
+                {
+                    Success = false,
+                    Message = "An error occurred while retrieving session."
+                });
+            }
+        }
+
+        [HttpPost("Logout")]
+        public JsonResult Logout()
+        {
+            try
+            {
+                HttpContext.Session.Clear();
+                return Json(new { Success = true, Message = "Logged out successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Logout");
+                return Json(new { Success = false, Message = "An error occurred during logout." });
+            }
+        }
+
+        // Enhanced Profile Endpoints
+        [HttpPost("CheckUsername")]
+        public JsonResult CheckUsername([FromBody] CheckUsernameDTO request)
+        {
+            try
+            {
+                IProfileDataBL profileBL = new ProfileDataBL(configuration);
+                var isAvailable = profileBL.CheckUsernameAvailability(request.Username);
+                
+                return Json(new { 
+                    Success = true, 
+                    Available = isAvailable,
+                    Message = isAvailable ? "Username is available" : "Username is already taken"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking username availability");
+                return Json(new { Success = false, Message = "An error occurred while checking username." });
+            }
+        }
+
+        [HttpPost("CompleteProfile")]
+        public JsonResult CompleteProfile([FromBody] UpdateProfileDTO request)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserID");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { Success = false, Message = "Unauthorized. Please log in." });
+                }
+
+                request.UserId = userId;
+
+                IProfileDataBL profileBL = new ProfileDataBL(configuration);
+                var result = profileBL.CompleteProfile(request);
+
+                if (result)
+                {
+                    // Update session to reflect profile completion
+                    HttpContext.Session.SetString("IsProfileComplete", "true");
+                    
+                    return Json(new { 
+                        Success = true, 
+                        Message = "Profile completed successfully"
+                    });
+                }
+
+                return Json(new { Success = false, Message = "Failed to update profile." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error completing profile");
+                return Json(new { Success = false, Message = "An error occurred while completing profile." });
+            }
+        }
+
+        [HttpPost("VerifyEmail")]
+        public JsonResult VerifyEmail([FromBody] EmailVerificationDTO request)
+        {
+            try
+            {
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+
+                IProfileDataBL profileBL = new ProfileDataBL(configuration);
+                var result = profileBL.VerifyEmail(request.Token, ipAddress, userAgent);
+
+                if (result)
+                {
+                    return Json(new { 
+                        Success = true, 
+                        Message = "Email verified successfully. You can now complete your profile."
+                    });
+                }
+
+                return Json(new { 
+                    Success = false, 
+                    Message = "Invalid or expired verification token." 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying email");
+                return Json(new { Success = false, Message = "An error occurred during email verification." });
+            }
+        }
+
+        [HttpPost("ResendVerificationEmail")]
+        public JsonResult ResendVerificationEmail([FromBody] EmailVerificationDTO request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.Email))
+                {
+                    return Json(new { Success = false, Message = "Email is required." });
+                }
+
+                IProfileDataBL profileBL = new ProfileDataBL(configuration);
+                var result = profileBL.ResendVerificationEmail(request.Email);
+
+                if (result)
+                {
+                    return Json(new { 
+                        Success = true, 
+                        Message = "Verification email sent. Please check your inbox."
+                    });
+                }
+
+                return Json(new { 
+                    Success = false, 
+                    Message = "User not found or email already verified." 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending verification email");
+                return Json(new { Success = false, Message = "An error occurred while sending email." });
+            }
+        }
+
+        [HttpPost("ChangePassword")]
+        public JsonResult ChangePassword([FromBody] ChangePasswordDTO request)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserID");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { Success = false, Message = "Unauthorized. Please log in." });
+                }
+
+                IProfileDataBL profileBL = new ProfileDataBL(configuration);
+                var result = profileBL.ChangePassword(userId, request.CurrentPassword, request.NewPassword);
+
+                if (result)
+                {
+                    return Json(new { 
+                        Success = true, 
+                        Message = "Password changed successfully."
+                    });
+                }
+
+                return Json(new { 
+                    Success = false, 
+                    Message = "Current password is incorrect." 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return Json(new { Success = false, Message = "An error occurred while changing password." });
             }
         }
     }

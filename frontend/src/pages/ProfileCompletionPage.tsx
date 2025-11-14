@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { updateProfile, fetchProfile } from '../services/api'
+import { authService } from '../services/auth'
 
 interface ProfileCompletionData {
   firstName: string
@@ -31,7 +32,16 @@ export function ProfileCompletionPage() {
   useEffect(() => {
     const loadProfileData = async () => {
       try {
-        const userId = localStorage.getItem('userId')
+        // Get user from auth service
+        const user = authService.getUser()
+        if (!user) {
+          console.error('No authenticated user found')
+          navigate('/login')
+          return
+        }
+        
+        const userId = user.id || user.Id
+        
         if (userId) {
           const profile = await fetchProfile(userId)
           if (profile?.name) {
@@ -80,12 +90,27 @@ export function ProfileCompletionPage() {
       return
     }
 
+    // Prevent double submission
+    if (isSubmitting) {
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitError(null)
     try {
-      const userId = localStorage.getItem('userId')
-      if (!userId) {
+      // Get user from auth service
+      const user = authService.getUser()
+      if (!user) {
         setSubmitError('You need to be signed in to complete your profile.')
+        setIsSubmitting(false)
+        navigate('/login')
+        return
+      }
+      
+      const userId = user.id || user.Id
+      
+      if (!userId) {
+        setSubmitError('Unable to identify user. Please sign in again.')
         setIsSubmitting(false)
         return
       }
@@ -93,19 +118,27 @@ export function ProfileCompletionPage() {
       // Combine first and last name for the name field
       const fullName = `${formData.firstName} ${formData.lastName}`.trim()
       
-      await updateProfile({
+      const result = await updateProfile({
         userid: userId,
         name: fullName,
         // Add other fields as we expand
       })
 
-      // Redirect to the intended page or dashboard
-      const redirectTo = state?.from?.pathname || '/dashboard'
-      navigate(redirectTo, { replace: true })
+      if (result.result === 1) {
+        // Update user in auth service
+        authService.setUser({ ...user, name: fullName })
+        window.dispatchEvent(new Event('userStateChanged'))
+
+        // Redirect to the intended page or dashboard
+        const redirectTo = state?.from?.pathname || '/dashboard'
+        navigate(redirectTo, { replace: true })
+      } else {
+        setSubmitError('Profile update failed. Please try again.')
+        setIsSubmitting(false)
+      }
     } catch (error) {
       console.error('Profile completion failed:', error)
       setSubmitError('We were unable to save your profile. Please try again.')
-    } finally {
       setIsSubmitting(false)
     }
   }

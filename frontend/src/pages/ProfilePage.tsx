@@ -6,6 +6,7 @@ import {
   NotificationData,
   ProfileData
 } from '../services/api'
+import { authService } from '../services/auth'
 
 type Status = 'idle' | 'loading' | 'error'
 
@@ -15,7 +16,15 @@ export function ProfilePage() {
   const [unreadCount, setUnreadCount] = useState<number | null>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
-  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
+  
+  // Get user ID from auth service
+  const getUserId = (): string | null => {
+    const user = authService.getUser()
+    if (!user) return null
+    return user.id || user.Id || null
+  }
+  
+  const userId = getUserId()
 
   useEffect(() => {
     let cancelled = false

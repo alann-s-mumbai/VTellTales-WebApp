@@ -12,6 +12,8 @@ import {
   LogOut
 } from 'lucide-react'
 import { cn } from '../utils/cn'
+import { authService } from '../services/auth'
+import { logout } from '../services/api'
 
 const navigationItems = [
   { icon: Home, label: 'Home', path: '/', exact: true },
@@ -38,29 +40,23 @@ export function Sidebar() {
 
   useEffect(() => {
     const updateUserState = () => {
-      const userData = localStorage.getItem('vtelltales_user')
-      if (userData) {
-        try {
-          setUser(JSON.parse(userData))
-        } catch (error) {
-          console.error('Error parsing user data:', error)
-        }
-      } else {
-        setUser(null)
-      }
+      const userData = authService.getUser()
+      setUser(userData)
     }
 
     // Initial load
     updateUserState()
-
-    // Listen for storage changes (when user logs in/out from other components)
-    window.addEventListener('storage', updateUserState)
     
-    // Listen for custom events (for same-tab updates)
+    // Subscribe to auth state changes
+    const unsubscribe = authService.subscribe((state) => {
+      setUser(state.user)
+    })
+    
+    // Listen for custom events (for backward compatibility)
     window.addEventListener('userStateChanged', updateUserState)
 
     return () => {
-      window.removeEventListener('storage', updateUserState)
+      unsubscribe()
       window.removeEventListener('userStateChanged', updateUserState)
     }
   }, [])
@@ -69,14 +65,17 @@ export function Sidebar() {
     navigate('/login')
   }
 
-  const handleLogout = (e: React.MouseEvent) => {
+  const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault()
-    localStorage.removeItem('vtelltales_user')
-    localStorage.removeItem('vtelltales_token')
-    localStorage.removeItem('vtelltales_firebase_token')
+    
+    // Clear session on backend
+    await logout()
+    
+    // Clear local auth state
+    authService.clearAuth()
     setUser(null)
     
-    // Dispatch custom event for same-tab updates
+    // Dispatch custom event for backward compatibility
     window.dispatchEvent(new Event('userStateChanged'))
     
     navigate('/')

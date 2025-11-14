@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react'
 import { registerWithEmail, type AuthResponse } from '../services/api'
+import { authService } from '../services/auth'
 
 export function RegisterPage() {
   const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [authFeedback, setAuthFeedback] = useState('')
   const [authError, setAuthError] = useState('')
   const [authLoading, setAuthLoading] = useState(false)
@@ -16,7 +18,7 @@ export function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!email || !password || !name) {
+    if (!email || !password || !firstName || !lastName) {
       setAuthError('Please fill in all fields')
       return
     }
@@ -31,24 +33,31 @@ export function RegisterPage() {
     setAuthLoading(true)
     
     try {
-      const result: AuthResponse = await registerWithEmail({ email, password, name })
+      const result: AuthResponse = await registerWithEmail({ 
+        email, 
+        password, 
+        firstName,
+        lastName,
+        userType: 'regular'
+      })
       
       if (result.success && result.user) {
-        // Store user session
-        localStorage.setItem('vtelltales_user', JSON.stringify(result.user))
-        if (result.token) {
-          localStorage.setItem('vtelltales_token', result.token)
-        }
+        // Set user in auth service (session managed by backend)
+        authService.setUser(result.user)
         
         // Dispatch event to update sidebar
         window.dispatchEvent(new Event('userStateChanged'))
         
-        setAuthFeedback(`Welcome to VtellTales, ${result.user.name || result.user.email}!`)
+        setAuthFeedback(`Welcome to VtellTales, ${firstName}!`)
         
-        // Navigate to dashboard after brief delay
+        // Navigate to email verification page
         setTimeout(() => {
-          navigate('/dashboard')
-        }, 2000)
+          if (result.requiresEmailVerification) {
+            navigate('/verify-email', { state: { email: result.user.email } })
+          } else {
+            navigate('/complete-profile')
+          }
+        }, 1500)
       } else {
         setAuthError(result.message || 'Registration failed. Please try again.')
       }
@@ -90,23 +99,44 @@ export function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                  First Name *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="firstName"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
+                    placeholder="John"
+                    autoComplete="given-name"
+                    required
+                  />
                 </div>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
-                  placeholder="Enter your full name"
-                  required
-                />
+              </div>
+              
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name *
+                </label>
+                <div className="relative">
+                  <input
+                    id="lastName"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="block w-full pl-3 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
+                    placeholder="Doe"
+                    autoComplete="family-name"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -125,6 +155,7 @@ export function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
                   placeholder="Enter your email"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -145,6 +176,7 @@ export function RegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
                   placeholder="Create a password (min. 6 characters)"
+                  autoComplete="new-password"
                   required
                   minLength={6}
                 />

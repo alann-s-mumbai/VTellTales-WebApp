@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { signInWithGoogle } from '../services/firebase'
 import { validateFirebaseToken, loginWithEmail, checkProfileCompletion, type AuthResponse } from '../services/api'
+import { authService } from '../services/auth'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -31,12 +32,8 @@ export function LoginPage() {
       const result: AuthResponse = await loginWithEmail({ email, password })
       
       if (result.success && result.user) {
-        // Store user session
-        localStorage.setItem('vtelltales_user', JSON.stringify(result.user))
-        localStorage.setItem('userId', result.user.id) // Store user ID for profile checking
-        if (result.token) {
-          localStorage.setItem('vtelltales_token', result.token)
-        }
+        // Set user in auth service (session managed by backend)
+        authService.setUser(result.user)
         
         // Dispatch event to update sidebar
         window.dispatchEvent(new Event('userStateChanged'))
@@ -102,9 +99,7 @@ export function LoginPage() {
           name: result.name || credential.user.displayName || 'Firebase User'
         }
         
-        localStorage.setItem('vtelltales_user', JSON.stringify(userData))
-        localStorage.setItem('userId', userData.id) // Store user ID for profile checking
-        localStorage.setItem('vtelltales_firebase_token', idToken)
+        authService.setUser(userData)
         
         // Dispatch event to update sidebar
         window.dispatchEvent(new Event('userStateChanged'))
@@ -140,14 +135,16 @@ export function LoginPage() {
       console.error('Google sign in error:', err)
       
       // Handle specific Firebase errors
-      if (err?.code === 'auth/api-key-not-valid') {
+      if (err?.code === 'auth/configuration-not-found') {
+        setAuthError('Google sign-in is not available. Please use email/password login.')
+      } else if (err?.code === 'auth/api-key-not-valid') {
         setAuthError('Google sign-in is not configured. Please use email/password login.')
       } else if (err?.code === 'auth/popup-closed-by-user') {
         setAuthError('Google sign-in was cancelled.')
       } else if (err?.code === 'auth/popup-blocked') {
         setAuthError('Please allow popups and try again.')
       } else {
-        setAuthError('Google sign-in failed. Please use email/password login or try again later.')
+        setAuthError('Google sign-in is temporarily unavailable. Please use email/password login.')
       }
     } finally {
       setAuthLoading(false)
@@ -200,6 +197,7 @@ export function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
                   placeholder="Enter your email"
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -220,6 +218,7 @@ export function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-yellow focus:border-transparent"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
                   required
                 />
                 <button

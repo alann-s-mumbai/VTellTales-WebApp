@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Web;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace VTellTales_WA.BL
 {
@@ -18,6 +20,129 @@ namespace VTellTales_WA.BL
         {
             configuration = _configuration;
         }
+
+        // Enhanced Profile Methods
+        public bool CheckUsernameAvailability(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return false;
+
+            IProfileDataDL profileDataDL = new ProfileDataDL(configuration);
+            return profileDataDL.IsUsernameAvailable(username);
+        }
+
+        public bool CompleteProfile(UpdateProfileDTO profileData)
+        {
+            if (profileData == null || string.IsNullOrWhiteSpace(profileData.UserId))
+                return false;
+
+            IProfileDataDL profileDataDL = new ProfileDataDL(configuration);
+            
+            // Update main profile
+            var result = profileDataDL.UpdateProfile(profileData);
+            
+            // If educator, save educator details from embedded fields
+            if (result && profileData.UserType == "educator")
+            {
+                var educatorDetails = new EducatorDetailsDTO
+                {
+                    SchoolName = profileData.SchoolName,
+                    SchoolAddress = profileData.SchoolAddress,
+                    SchoolPhone = profileData.SchoolPhone,
+                    TeachingSubjects = profileData.TeachingSubjects,
+                    YearsOfExperience = profileData.YearsOfExperience
+                };
+                profileDataDL.SaveEducatorDetails(profileData.UserId, educatorDetails);
+            }
+
+            return result;
+        }
+
+        public string GenerateEmailVerificationToken(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return null;
+
+            // Generate secure random token
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "");
+
+            var expiresAt = DateTime.UtcNow.AddHours(24);
+
+            IProfileDataDL profileDataDL = new ProfileDataDL(configuration);
+            var saved = profileDataDL.SaveEmailVerificationToken(userId, token, expiresAt);
+
+            return saved ? token : null;
+        }
+
+        public bool VerifyEmail(string token, string ipAddress = null, string userAgent = null)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return false;
+
+            IProfileDataDL profileDataDL = new ProfileDataDL(configuration);
+            
+            // Validate token and get user
+            var userId = profileDataDL.GetUserIdByVerificationToken(token);
+            if (string.IsNullOrWhiteSpace(userId))
+                return false;
+
+            // Mark email as verified
+            var verified = profileDataDL.MarkEmailAsVerified(userId);
+            
+            // Log verification
+            if (verified)
+            {
+                profileDataDL.LogEmailVerification(userId, token, ipAddress, userAgent);
+            }
+
+            return verified;
+        }
+
+        public bool ResendVerificationEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            IProfileDataDL profileDataDL = new ProfileDataDL(configuration);
+            
+            // Get user by email
+            var userId = profileDataDL.GetUserIdByEmail(email);
+            if (string.IsNullOrWhiteSpace(userId))
+                return false;
+
+            // Generate new token
+            var token = GenerateEmailVerificationToken(userId);
+            if (string.IsNullOrWhiteSpace(token))
+                return false;
+
+            // TODO: Send email via EmailService
+            // EmailService.SendVerificationEmail(email, token);
+
+            return true;
+        }
+
+        public bool ChangePassword(string userId, string currentPassword, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(userId) || 
+                string.IsNullOrWhiteSpace(currentPassword) || 
+                string.IsNullOrWhiteSpace(newPassword))
+                return false;
+
+            IProfileDataDL profileDataDL = new ProfileDataDL(configuration);
+            
+            // Verify current password
+            var isValid = profileDataDL.ValidatePassword(userId, currentPassword);
+            if (!isValid)
+                return false;
+
+            // Update to new password
+            return profileDataDL.UpdatePassword(userId, newPassword);
+        }
+
+        // Existing methods...
         public ProfileDataDTO? getToken(string userID)
         {
             if (userID == null)
@@ -427,12 +552,13 @@ namespace VTellTales_WA.BL
 
         public AuthResponseDTO RegisterUser(RegisterRequestDTO request)
         {
-            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password) || string.IsNullOrEmpty(request.Name))
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password) || 
+                string.IsNullOrEmpty(request.FirstName) || string.IsNullOrEmpty(request.LastName))
             {
                 return new AuthResponseDTO
                 {
                     Success = false,
-                    Message = "Email, password, and name are required."
+                    Message = "Email, password, first name, and last name are required."
                 };
             }
 
@@ -450,12 +576,13 @@ namespace VTellTales_WA.BL
                     };
                 }
 
+                var fullName = $"{request.FirstName} {request.LastName}";
                 var newUser = new ProfileDataDTO
                 {
                     userid = Guid.NewGuid().ToString(),
                     email = request.Email,
                     password = request.Password, // Hash this in production
-                    name = request.Name,
+                    name = fullName,
                     cdate = DateTime.Now,
                     udate = DateTime.Now
                 };
@@ -471,7 +598,12 @@ namespace VTellTales_WA.BL
                         {
                             Id = newUser.userid,
                             Email = newUser.email,
-                            Name = newUser.name
+                            Name = fullName,
+                            FirstName = request.FirstName,
+                            LastName = request.LastName,
+                            UserType = request.UserType,
+                            IsEmailVerified = false,
+                            IsProfileComplete = false
                         },
                         Message = "Registration successful."
                     };

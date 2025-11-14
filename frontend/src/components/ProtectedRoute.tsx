@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { checkProfileCompletion } from '../services/api'
+import { authService } from '../services/auth'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -9,12 +10,24 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isProfileComplete, setIsProfileComplete] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const location = useLocation()
-  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
 
   useEffect(() => {
-    const checkProfile = async () => {
+    const checkAuth = async () => {
       try {
+        const user = authService.getUser()
+        
+        if (!user) {
+          setIsAuthenticated(false)
+          setIsProfileComplete(false)
+          setIsLoading(false)
+          return
+        }
+
+        setIsAuthenticated(true)
+        
+        const userId = user.id || user.Id
         if (!userId) {
           setIsProfileComplete(false)
           setIsLoading(false)
@@ -25,14 +38,25 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         setIsProfileComplete(isComplete)
       } catch (error) {
         console.error('Error checking profile:', error)
+        setIsAuthenticated(false)
         setIsProfileComplete(false)
       } finally {
         setIsLoading(false)
       }
     }
 
-    checkProfile()
-  }, [userId])
+    checkAuth()
+
+    // Subscribe to auth state changes
+    const unsubscribe = authService.subscribe((state) => {
+      if (!state.isAuthenticated) {
+        setIsAuthenticated(false)
+        setIsProfileComplete(false)
+      }
+    })
+
+    return unsubscribe
+  }, [])
 
   if (isLoading) {
     return (
@@ -45,7 +69,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  if (!userId) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 

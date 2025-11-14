@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User, Settings, Home, BookOpen, Plus } from 'lucide-react'
+import { authService } from '../services/auth'
 
 interface User {
   id: string
@@ -14,22 +15,18 @@ export function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const userData = localStorage.getItem('vtelltales_user')
-    if (!userData) {
+    // Get user from auth service
+    const currentUser = authService.getUser()
+    
+    if (!currentUser) {
       navigate('/login')
       return
     }
 
-    try {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-      
-      // Dispatch event to update sidebar
-      window.dispatchEvent(new Event('userStateChanged'))
-    } catch (error) {
-      console.error('Error parsing user data:', error)
-      navigate('/login')
-    }
+    setUser(currentUser)
+    
+    // Dispatch event to update sidebar
+    window.dispatchEvent(new Event('userStateChanged'))
   }, [navigate])
 
   if (!user) {

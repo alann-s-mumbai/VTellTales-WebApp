@@ -28,15 +28,8 @@ export function StoryDetailsPage() {
   const [isFollowing, setIsFollowing] = useState(false)
   const [followStatusState, setFollowStatusState] = useState<'idle' | 'loading' | 'processing' | 'error'>('idle')
   const [followMessage, setFollowMessage] = useState<string>('')
-  const session = typeof window !== 'undefined' ? localStorage.getItem('vtelltales_user') : null
-  const currentUser = session ? (() => {
-    try {
-      return JSON.parse(session) as { id?: string; name?: string; profileImg?: string }
-    } catch {
-      return null
-    }
-  })() : null
-  const userId = currentUser?.id ?? (typeof window !== 'undefined' ? localStorage.getItem('userId') : null)
+  const currentUser = authService.getUser()
+  const userId = currentUser?.id || currentUser?.Id || null
 
   useEffect(() => {
     let cancelled = false

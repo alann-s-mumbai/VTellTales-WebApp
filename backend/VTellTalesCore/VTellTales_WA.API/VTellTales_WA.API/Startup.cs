@@ -86,6 +86,18 @@ namespace VTellTales_WA.API
 
             services.AddControllers();
 
+            // Add session support
+            services.AddDistributedMemoryCache();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(7); // Session timeout
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.Name = ".VTellTales.Session";
+            });
+
             // Register Email Service
             services.AddScoped<VTellTales_WA.API.Services.IEmailService, VTellTales_WA.API.Services.EmailService>();
 
@@ -119,6 +131,8 @@ namespace VTellTales_WA.API
             app.UseRouting();
 
             app.UseCors("Default");
+
+            app.UseSession();
 
             app.UseAuthorization();
 

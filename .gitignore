@@ -434,3 +434,7 @@ Archive.zip
 frontend-*.tar.gz
 backend-*.tar.gz
 manual-deployment/*.tar.gz
+
+# Backend publish outputs
+**/publish_local/
+backend/VTellTalesCore/VTellTales_WA.API/VTellTales_WA.API/publish_local/

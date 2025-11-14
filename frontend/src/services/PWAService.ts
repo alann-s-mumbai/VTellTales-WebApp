@@ -34,8 +34,8 @@ export class PWAService {
         // Listen for online/offline events
         this.setupNetworkListeners();
 
-        // Request notification permission
-        await this.requestNotificationPermission();
+        // Don't request notification permission on init - wait for user gesture
+        // await this.requestNotificationPermission();
 
         // Setup background sync
         this.setupBackgroundSync();
@@ -83,11 +83,20 @@ export class PWAService {
 
   private async requestNotificationPermission(): Promise<void> {
     if ('Notification' in window && 'serviceWorker' in navigator) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('Notification permission granted');
+      // Only request if not already granted or denied
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          console.log('Notification permission granted');
+        }
       }
     }
+  }
+
+  // Public method to request notification permission on user action
+  async enableNotifications(): Promise<boolean> {
+    await this.requestNotificationPermission();
+    return Notification.permission === 'granted';
   }
 
   private setupBackgroundSync(): void {

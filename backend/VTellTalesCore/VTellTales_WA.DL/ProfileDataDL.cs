@@ -640,5 +640,208 @@ namespace VTellTales_WA.DL
             return profileDataDTO;
         }
 
+        // Enhanced Profile Methods
+        public bool IsUsernameAvailable(string username)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = "SELECT COUNT(*) FROM usertbl WHERE username = @username";
+                cmd.Parameters.AddWithValue("@username", username);
+                
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return count == 0;
+            }
+        }
+
+        public bool UpdateProfile(UpdateProfileDTO profileData)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"UPDATE usertbl 
+                    SET first_name = @firstName,
+                        last_name = @lastName,
+                        username = @username,
+                        avatar = @avatar,
+                        date_of_birth = @dateOfBirth,
+                        phone_number = @phoneNumber,
+                        facebook_account = @facebookAccount,
+                        instagram_account = @instagramAccount,
+                        address = @address,
+                        occupation = @occupation,
+                        user_type = @userType,
+                        is_profile_complete = 1,
+                        udate = @updateDate
+                    WHERE userid = @userId";
+
+                cmd.Parameters.AddWithValue("@userId", profileData.UserId);
+                cmd.Parameters.AddWithValue("@firstName", profileData.FirstName ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@lastName", profileData.LastName ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@username", profileData.Username ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@avatar", profileData.Avatar ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@dateOfBirth", profileData.DateOfBirth ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@phoneNumber", profileData.PhoneNumber ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@facebookAccount", profileData.FacebookAccount ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@instagramAccount", profileData.InstagramAccount ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@address", profileData.Address ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@occupation", profileData.Occupation ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@userType", profileData.UserType ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@updateDate", DateTime.UtcNow);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+        }
+
+        public bool SaveEducatorDetails(string userId, EducatorDetailsDTO educatorDetails)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"INSERT INTO educator_details 
+                    (user_id, school_name, school_address, school_phone, teaching_subjects, years_of_experience)
+                    VALUES (@userId, @schoolName, @schoolAddress, @schoolPhone, @teachingSubjects, @yearsOfExperience)
+                    ON DUPLICATE KEY UPDATE
+                        school_name = @schoolName,
+                        school_address = @schoolAddress,
+                        school_phone = @schoolPhone,
+                        teaching_subjects = @teachingSubjects,
+                        years_of_experience = @yearsOfExperience,
+                        updated_date = CURRENT_TIMESTAMP";
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@schoolName", educatorDetails.SchoolName ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@schoolAddress", educatorDetails.SchoolAddress ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@schoolPhone", educatorDetails.SchoolPhone ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@teachingSubjects", educatorDetails.TeachingSubjects ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@yearsOfExperience", educatorDetails.YearsOfExperience ?? (object)DBNull.Value);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+        }
+
+        public bool SaveEmailVerificationToken(string userId, string token, DateTime expiresAt)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"UPDATE usertbl 
+                    SET email_verification_token = @token,
+                        email_verification_expires = @expiresAt
+                    WHERE userid = @userId";
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@token", token);
+                cmd.Parameters.AddWithValue("@expiresAt", expiresAt);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+        }
+
+        public string GetUserIdByVerificationToken(string token)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"SELECT userid FROM usertbl 
+                    WHERE email_verification_token = @token 
+                    AND email_verification_expires > @now
+                    AND is_email_verified = 0";
+
+                cmd.Parameters.AddWithValue("@token", token);
+                cmd.Parameters.AddWithValue("@now", DateTime.UtcNow);
+
+                var result = cmd.ExecuteScalar();
+                return result?.ToString();
+            }
+        }
+
+        public bool MarkEmailAsVerified(string userId)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"UPDATE usertbl 
+                    SET is_email_verified = 1,
+                        email_verification_token = NULL,
+                        email_verification_expires = NULL
+                    WHERE userid = @userId";
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+        }
+
+        public bool LogEmailVerification(string userId, string token, string ipAddress, string userAgent)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"INSERT INTO email_verification_log 
+                    (user_id, token, verified_date, ip_address, user_agent)
+                    VALUES (@userId, @token, @verifiedDate, @ipAddress, @userAgent)";
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@token", token);
+                cmd.Parameters.AddWithValue("@verifiedDate", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@ipAddress", ipAddress ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@userAgent", userAgent ?? (object)DBNull.Value);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+        }
+
+        public string GetUserIdByEmail(string email)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = "SELECT userid FROM usertbl WHERE email = @email";
+                cmd.Parameters.AddWithValue("@email", email);
+
+                var result = cmd.ExecuteScalar();
+                return result?.ToString();
+            }
+        }
+
+        public bool ValidatePassword(string userId, string password)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = "SELECT COUNT(*) FROM usertbl WHERE userid = @userId AND password = @password";
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@password", password);
+
+                var count = Convert.ToInt32(cmd.ExecuteScalar());
+                return count > 0;
+            }
+        }
+
+        public bool UpdatePassword(string userId, string newPassword)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"UPDATE usertbl 
+                    SET password = @password,
+                        udate = @updateDate
+                    WHERE userid = @userId";
+
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@password", newPassword);
+                cmd.Parameters.AddWithValue("@updateDate", DateTime.UtcNow);
+
+                var result = cmd.ExecuteNonQuery();
+                return result > 0;
+            }
+        }
+
     }
 }

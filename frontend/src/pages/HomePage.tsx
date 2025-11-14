@@ -313,8 +313,8 @@ export function HomePage() {
                   className="rounded-3xl border border-gray-100 bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                   onClick={() => {
                     // Check if user is logged in
-                    const user = localStorage.getItem('vtelltales_user')
-                    if (user) {
+                    const isLoggedIn = authService.isAuthenticated()
+                    if (isLoggedIn) {
                       // Navigate to story view - you can implement this route
                       console.log(`Opening story: ${story.storytitle}. Story viewer not yet implemented.`)
                       setError('Story viewer not yet implemented. Coming soon!')

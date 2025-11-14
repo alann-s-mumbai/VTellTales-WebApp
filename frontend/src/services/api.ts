@@ -146,10 +146,17 @@ export interface AuthResponse {
     id: string
     email: string
     name?: string
+    firstName?: string
+    lastName?: string
+    username?: string
     profileImg?: string
+    userType?: string
+    isEmailVerified?: boolean
+    isProfileComplete?: boolean
   }
   token?: string
   message?: string
+  requiresEmailVerification?: boolean
 }
 
 export const DEFAULT_USER_ID = 'demo'
@@ -212,18 +219,21 @@ export const isProfileComplete = (profile: ProfileData): boolean => {
 export const checkProfileCompletion = async (userId: string): Promise<boolean> => {
   try {
     const profile = await fetchProfile(userId)
-    if (!profile) return false
     
-    return isProfileComplete(profile)
+    // Check if profile has a name with both first and last name
+    const hasCompleteName = profile?.name && profile.name.trim().split(' ').length >= 2
+    
+    if (!hasCompleteName) {
+      // Profile is incomplete
+      return false
+    }
+    
+    // Profile is complete
+    return true
   } catch (error) {
     console.error('Error checking profile completion:', error)
     return false
   }
-}
-
-// Helper function for testing - clears profile completion status
-export const clearProfileCompletion = (): void => {
-  localStorage.removeItem('profileCompleted')
 }
 
 export const fetchStoryComments = async (
@@ -310,7 +320,9 @@ export const fetchStoriesByPage = async (
   page = 1,
   limit = 12
 ): Promise<StoryData[]> => {
-  const response = await fetch(buildUrl(`storyapi/StoryBook/GetAllStoriesbypage/${userId}/${page}/${limit}`))
+  // Use '0' as default userId when not provided
+  const userIdParam = userId || '0'
+  const response = await fetch(buildUrl(`storyapi/StoryBook/GetAllStoriesbypage/${userIdParam}/${page}/${limit}`))
   return handleJsonResponse<StoryData[]>(response)
 }
 
@@ -379,24 +391,73 @@ export const loginWithEmail = async (credentials: LoginCredentials): Promise<Aut
   const response = await fetch(buildUrl('storyapi/StoryBook/LoginUser'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // Enable cookie support
     body: JSON.stringify(credentials)
   })
 
-  return handleJsonResponse<AuthResponse>(response)
+  const data = await response.json()
+  
+  // Normalize backend response (capital Success/User) to match interface (lowercase)
+  return {
+    success: data.Success ?? data.success ?? false,
+    user: data.User ?? data.user,
+    token: data.Token ?? data.token,
+    message: data.Message ?? data.message
+  }
 }
 
 export const registerWithEmail = async (userData: {
   email: string
   password: string
-  name: string
+  firstName: string
+  lastName: string
+  userType?: string
 }): Promise<AuthResponse> => {
   const response = await fetch(buildUrl('storyapi/StoryBook/RegisterUser'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // Enable cookie support
     body: JSON.stringify(userData)
   })
 
-  return handleJsonResponse<AuthResponse>(response)
+  const data = await response.json()
+  
+  // Normalize backend response (capital Success/User) to match interface (lowercase)
+  return {
+    success: data.Success ?? data.success ?? false,
+    user: data.User ?? data.user,
+    token: data.Token ?? data.token,
+    message: data.Message ?? data.message,
+    requiresEmailVerification: data.RequiresEmailVerification ?? data.requiresEmailVerification ?? false
+  }
+}
+
+// Logout - clear session
+export const logout = async (): Promise<void> => {
+  try {
+    await fetch(buildUrl('storyapi/StoryBook/Logout'), {
+      method: 'POST',
+      credentials: 'include'
+    })
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
+
+// Get current authenticated user
+export const getCurrentUser = async (): Promise<AuthResponse> => {
+  const response = await fetch(buildUrl('storyapi/StoryBook/GetCurrentUser'), {
+    method: 'GET',
+    credentials: 'include'
+  })
+
+  const data = await response.json()
+  
+  return {
+    success: data.Success ?? data.success ?? false,
+    user: data.User ?? data.user,
+    message: data.Message ?? data.message
+  }
 }
 
 // Check if user exists by email

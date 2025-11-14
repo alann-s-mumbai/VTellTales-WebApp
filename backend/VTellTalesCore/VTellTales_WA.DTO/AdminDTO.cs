@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace VTellTales_WA.DTO
@@ -109,5 +110,204 @@ namespace VTellTales_WA.DTO
             tags = string.Empty;
             file = null;
         }
+    }
+
+    // New Admin System DTOs
+    public class AdminUserDTO
+    {
+        public int Id { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string Role { get; set; } = "support";
+        public bool IsActive { get; set; } = true;
+        public DateTime? LastLogin { get; set; }
+        public int? CreatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+    }
+
+    public class AdminLoginRequestDTO
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class AdminLoginResponseDTO
+    {
+        public bool Success { get; set; }
+        public AdminUserDTO? Admin { get; set; }
+        public string? Message { get; set; }
+        public bool RequiresSetup { get; set; }
+    }
+
+    public class AdminSetupDTO
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(2)]
+        public string FirstName { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(2)]
+        public string LastName { get; set; } = string.Empty;
+    }
+
+    public class CreateAdminDTO
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+        
+        [Required]
+        public string FirstName { get; set; } = string.Empty;
+        
+        [Required]
+        public string LastName { get; set; } = string.Empty;
+        
+        [Required]
+        public string Role { get; set; } = "support";
+    }
+
+    public class UpdateAdminDTO
+    {
+        [Required]
+        public int Id { get; set; }
+        
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Role { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
+    public class SystemSettingDTO
+    {
+        public int Id { get; set; }
+        public string SettingKey { get; set; } = string.Empty;
+        public string? SettingValue { get; set; }
+        public bool IsEncrypted { get; set; }
+        public string Category { get; set; } = "general";
+        public string? Description { get; set; }
+        public int? UpdatedBy { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+    }
+
+    public class SmtpSettingsDTO
+    {
+        [Required]
+        public string Host { get; set; } = string.Empty;
+        
+        [Required]
+        public int Port { get; set; } = 587;
+        
+        public string? Username { get; set; }
+        public string? Password { get; set; }
+        
+        [Required]
+        [EmailAddress]
+        public string FromEmail { get; set; } = string.Empty;
+        
+        [Required]
+        public string FromName { get; set; } = string.Empty;
+        
+        public bool UseSsl { get; set; } = true;
+    }
+
+    public class EmailTemplateDTO
+    {
+        public int Id { get; set; }
+        public string TemplateKey { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = string.Empty;
+        public string? Subject { get; set; }
+        public string? BodyHtml { get; set; }
+        public string? BodyText { get; set; }
+        public string? Variables { get; set; }
+        public bool IsActive { get; set; } = true;
+        public int? UpdatedBy { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+    }
+
+    public class UpdateEmailTemplateDTO
+    {
+        [Required]
+        public int Id { get; set; }
+        
+        public string? TemplateName { get; set; }
+        public string? Subject { get; set; }
+        public string? BodyHtml { get; set; }
+        public string? BodyText { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
+    public class AdminActivityLogDTO
+    {
+        public int Id { get; set; }
+        public int AdminId { get; set; }
+        public string AdminEmail { get; set; } = string.Empty;
+        public string Action { get; set; } = string.Empty;
+        public string? EntityType { get; set; }
+        public string? EntityId { get; set; }
+        public string? Details { get; set; }
+        public string? IpAddress { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    public class AdminUserListDTO
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string? Name { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Username { get; set; }
+        public string UserType { get; set; } = "regular";
+        public bool IsEmailVerified { get; set; }
+        public bool IsProfileComplete { get; set; }
+        public bool IsBlocked { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? LastLogin { get; set; }
+    }
+
+    public class BlockUserDTO
+    {
+        [Required]
+        public string UserId { get; set; } = string.Empty;
+        
+        public string? Reason { get; set; }
+    }
+
+    public class DashboardStatsDTO
+    {
+        public int TotalUsers { get; set; }
+        public int TotalStories { get; set; }
+        public int TotalEducators { get; set; }
+        public int UnverifiedUsers { get; set; }
+        public int BlockedUsers { get; set; }
+        public int TodayRegistrations { get; set; }
+        public int TodayStories { get; set; }
+        public int ActiveUsers { get; set; }
+    }
+
+    public class RegistrationTrendDTO
+    {
+        public string Date { get; set; } = string.Empty;
+        public int Count { get; set; }
     }
 }
