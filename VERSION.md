@@ -154,7 +154,7 @@ npm run deploy:prod
 
 ### 🌐 Deployment Targets
 - **Frontend**: webapp.vtelltales.com
-- **Backend**: webapi.vtelltales.com
+- **Backend API**: under `webapp.vtelltales.com/api`
 - **Database**: VTellTales_Web_db on Contabo server
 
 ---

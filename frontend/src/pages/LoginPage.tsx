@@ -54,7 +54,6 @@ export function LoginPage() {
             }, 1500)
           } else {
             // Profile complete - mark as completed and navigate to dashboard
-            localStorage.setItem('profileCompleted', 'true')
             setTimeout(() => {
               navigate('/dashboard')
             }, 1500)
@@ -123,7 +122,6 @@ export function LoginPage() {
             }, 1500)
           } else {
             // Profile complete - mark as completed and navigate to dashboard
-            localStorage.setItem('profileCompleted', 'true')
             setTimeout(() => {
               navigate('/dashboard')
             }, 1500)

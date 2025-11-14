@@ -119,7 +119,7 @@ npm install
 
 # Create development environment file
 cat > .env.development << EOF
-VITE_API_BASE_URL=http://localhost:5000
+VITE_API_BASE_URL=http://127.0.0.1:5001
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-firebase-project-id
@@ -153,8 +153,8 @@ npm run dev
 
 3. **Access Applications**
    - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
-   - API Documentation: http://localhost:5000/swagger
+  - Backend API: http://127.0.0.1:5001
+  - API Documentation: http://127.0.0.1:5001/swagger
 
 ### Making Changes
 
@@ -313,7 +313,7 @@ INSERT INTO userstory (userid, storytitle, storydesc, storytypeid) VALUES
 
 #### Frontend (.env.development)
 ```env
-VITE_API_BASE_URL=http://localhost:5000
+VITE_API_BASE_URL=http://127.0.0.1:5001
 VITE_ENVIRONMENT=development
 VITE_LOG_LEVEL=debug
 VITE_FIREBASE_API_KEY=your_development_key
@@ -408,7 +408,7 @@ dotnet run
 ### Debug Commands
 ```bash
 # Check service status
-curl http://localhost:5000/health
+curl http://127.0.0.1:5001/health
 curl http://localhost:3000
 
 # Database connection test

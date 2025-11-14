@@ -7,7 +7,7 @@ All build artifacts and deployment scripts have been prepared for production dep
 ## 📦 What's Been Prepared
 
 ### ✅ Built Applications
-- **Frontend**: Production build with API URL `https://webapi.vtelltales.com`
+- **Frontend**: Production build with API URL `https://webapp.vtelltales.com/api`
 - **Backend**: Release compilation targeting .NET 8.0 runtime
 - **Database**: Connection configured for `VTellTales_Web_db` 
 
@@ -74,7 +74,7 @@ If automated deployment isn't possible, here's the manual process:
 cd /Users/alann/Projects/VTellTales-WebApp/frontend/dist
 tar -czf frontend.tar.gz *
 
-# Manual upload to server: /var/www/webapp.vtelltales.com/html/
+# Manual upload to server: /var/www/webapp.vtelltales.com/app/
 ```
 
 ### 2. Upload Backend  
@@ -83,7 +83,7 @@ tar -czf frontend.tar.gz *
 cd /Users/alann/Projects/VTellTales-WebApp/backend/VTellTalesCore/publish
 tar -czf backend.tar.gz *
 
-# Manual upload to server: /var/www/webapi.vtelltales.com/app/
+# Manual upload to server: /var/www/webapp.vtelltales.com/api/
 ```
 
 ### 3. Server Configuration
@@ -92,15 +92,15 @@ On the Contabo server (94.136.189.179), execute:
 
 ```bash
 # Extract frontend
-cd /var/www/webapp.vtelltales.com/html
+cd /var/www/webapp.vtelltales.com/app
 tar -xzf frontend.tar.gz
-chown -R www-data:www-data /var/www/webapp.vtelltales.com/html
+chown -R www-data:www-data /var/www/webapp.vtelltales.com/app
 
 # Extract backend  
-cd /var/www/webapi.vtelltales.com/app
+cd /var/www/webapp.vtelltales.com/api
 tar -xzf backend.tar.gz
 chmod +x VTellTales_WA.API
-chown -R www-data:www-data /var/www/webapi.vtelltales.com/app
+chown -R www-data:www-data /var/www/webapp.vtelltales.com/api
 ```
 
 ### 4. Create Systemd Service
@@ -114,13 +114,13 @@ After=network.target
 
 [Service]
 Type=notify
-WorkingDirectory=/var/www/webapi.vtelltales.com/app
-ExecStart=/usr/bin/dotnet /var/www/webapi.vtelltales.com/app/VTellTales_WA.API.dll
+WorkingDirectory=/var/www/webapp.vtelltales.com/api
+ExecStart=/usr/bin/dotnet /var/www/webapp.vtelltales.com/api/VTellTales_WA.API.dll
 Restart=always
 RestartSec=10
 User=www-data
 Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=ASPNETCORE_URLS=http://localhost:5000
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5001
 
 [Install]
 WantedBy=multi-user.target
@@ -140,7 +140,7 @@ cat > /etc/nginx/sites-available/webapp.vtelltales.com << 'EOF'
 server {
     listen 80;
     server_name webapp.vtelltales.com;
-    root /var/www/webapp.vtelltales.com/html;
+    root /var/www/webapp.vtelltales.com/app;
     index index.html;
 
     location / {
@@ -154,29 +154,8 @@ server {
 }
 EOF
 
-# Create webapi nginx config
-cat > /etc/nginx/sites-available/webapi.vtelltales.com << 'EOF'
-server {
-    listen 80;
-    server_name webapi.vtelltales.com;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        add_header 'Access-Control-Allow-Origin' 'https://webapp.vtelltales.com' always;
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE' always;
-        add_header 'Access-Control-Allow-Headers' 'Origin, Content-Type, Accept, Authorization' always;
-    }
-}
-EOF
-
-# Enable sites and reload nginx
+# Enable site and reload nginx
 ln -sf /etc/nginx/sites-available/webapp.vtelltales.com /etc/nginx/sites-enabled/
-ln -sf /etc/nginx/sites-available/webapi.vtelltales.com /etc/nginx/sites-enabled/
 nginx -t && systemctl reload nginx
 ```
 
@@ -187,16 +166,14 @@ nginx -t && systemctl reload nginx
 # Test frontend
 curl -I http://webapp.vtelltales.com
 
-# Test backend API
-curl -I http://webapi.vtelltales.com
-
-# Test specific API endpoint
-curl http://webapi.vtelltales.com/storyapi/StoryBook/getallstorytype
+# Test API via unified domain
+curl -I http://webapp.vtelltales.com
+curl http://webapp.vtelltales.com/api/storyapi/StoryBook/getallstorytype
 ```
 
 ### Expected Results
 - **webapp.vtelltales.com**: Returns HTML with VTellTales React app
-- **webapi.vtelltales.com**: Returns API responses
+- **webapp.vtelltales.com/api**: Returns API responses
 - **Profile completion**: Mandatory flow works correctly
 - **Database**: Connected to VTellTales_Web_db successfully
 
@@ -223,7 +200,7 @@ tail -f /var/log/nginx/error.log
 
 Once deployed successfully:
 - **Frontend**: http://webapp.vtelltales.com ✅
-- **Backend API**: http://webapi.vtelltales.com ✅  
+- **Backend API**: http://webapp.vtelltales.com/api ✅  
 - **Database**: VTellTales_Web_db connected ✅
 - **Profile System**: Mandatory completion enforced ✅
 

@@ -87,8 +87,8 @@ VTellTales-WebApp/
 
 ### Development URLs
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
-- **API Documentation**: http://localhost:5000/swagger
+-- **Backend API**: http://127.0.0.1:5001
+-- **API Documentation**: http://127.0.0.1:5001/swagger
 
 ## 🌐 Production Deployment
 
@@ -106,8 +106,8 @@ cd frontend && npm run build
 cd backend && dotnet publish -c Release
 
 # Upload to server
-scp -r dist/* user@server:/var/www/webapp.vtelltales.com/html/
-scp -r publish/* user@server:/var/www/webapi.vtelltales.com/app/
+scp -r dist/* user@server:/var/www/webapp.vtelltales.com/app/
+scp -r publish/* user@server:/var/www/webapp.vtelltales.com/api/
 ```
 
 ### Production URLs
@@ -173,7 +173,7 @@ Database (MariaDB)
 
 **Frontend (.env)**
 ```env
-VITE_API_BASE_URL=http://localhost:5000
+VITE_API_BASE_URL=http://127.0.0.1:5001
 VITE_FIREBASE_API_KEY=your_firebase_key
 ```
 

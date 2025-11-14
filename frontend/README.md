@@ -128,7 +128,7 @@ The frontend is designed to integrate with the VTellTales .NET 8 Web API. Update
 
 ```typescript
 // Future API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:5001'
 ```
 
 ## 🌟 iMac Optimizations

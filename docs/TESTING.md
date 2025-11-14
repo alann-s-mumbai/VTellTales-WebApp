@@ -216,7 +216,7 @@ describe('API Service', () => {
 
       const result = await getStories()
 
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/storyapi/userstory/all?page=1&pageSize=10')
+      expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:5001/storyapi/userstory/all?page=1&pageSize=10')
       expect(result).toEqual(mockResponse)
     })
 
@@ -244,7 +244,7 @@ describe('API Service', () => {
       const result = await createStory(newStory)
 
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:5000/storyapi/userstory',
+        'http://127.0.0.1:5001/storyapi/userstory',
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -39,9 +39,9 @@ if [ ! -f "appsettings.json" ]; then
 fi
 
 echo ""
-echo "🌟 Backend API starting on http://localhost:5000"
-echo "📋 API Documentation: http://localhost:5000/swagger"
-echo "🔗 Test endpoint: http://localhost:5000/storyapi/StoryBook/getallstorytype"
+echo "🌟 Backend API starting on http://127.0.0.1:5001"
+echo "📋 API Documentation: http://127.0.0.1:5001/swagger"
+echo "🔗 Test endpoint: http://127.0.0.1:5001/storyapi/StoryBook/getallstorytype"
 echo "📁 Working directory: $(pwd)"
 echo ""
 echo "Press Ctrl+C to stop the server"

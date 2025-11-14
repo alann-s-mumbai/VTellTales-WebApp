@@ -62,7 +62,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_BASE_URL=http://localhost:5000
+      - VITE_API_BASE_URL=http://127.0.0.1:5001
       - VITE_ENVIRONMENT=development
     volumes:
       - ./frontend:/app
@@ -147,7 +147,7 @@ services:
       - vtelltales-network
     restart: always
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -368,7 +368,7 @@ USER dotnet
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
+  CMD curl -f http://127.0.0.1:5001/health || exit 1
 
 # Set environment
 ENV ASPNETCORE_ENVIRONMENT=Production
@@ -617,7 +617,7 @@ ASPNETCORE_ENVIRONMENT=Development
 
 # Frontend
 FRONTEND_PORT=3000
-VITE_API_BASE_URL=http://localhost:5000
+VITE_API_BASE_URL=http://127.0.0.1:5001
 VITE_ENVIRONMENT=development
 
 # Firebase (optional for development)

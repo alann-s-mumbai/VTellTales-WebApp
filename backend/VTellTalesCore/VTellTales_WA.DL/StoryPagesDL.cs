@@ -94,7 +94,7 @@ namespace VTellTales_WA.DL
         public string deletestorypagefile(string storypagefile, string userid)
         {
             var dpath = Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "storydata\\") + userid + "\\" + storypagefile.Substring(storypagefile.LastIndexOf("/")));
-            dpath = dpath.Replace("api.vtelltales.com", "data.vtelltales.com");
+            dpath = dpath.Replace("api.vtelltales.com", "webapp.vtelltales.com/data");
             FileInfo file = new FileInfo(dpath);
             try
             {

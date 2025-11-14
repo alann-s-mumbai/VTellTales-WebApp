@@ -353,7 +353,7 @@ export class AnalyticsService {
 
   // Engagement tracking
   private setupEngagementTracking(): void {
-    let startTime = Date.now();
+    const startTime = Date.now();
     
     // Track time on page
     window.addEventListener('beforeunload', () => {

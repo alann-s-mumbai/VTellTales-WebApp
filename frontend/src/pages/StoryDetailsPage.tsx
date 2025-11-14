@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom'
 import {
   addFollowing,
   addStoryComment,
-  DEFAULT_USER_ID,
   fetchFanClub,
   fetchStoryComments,
   fetchStoryDetails,
@@ -29,6 +28,15 @@ export function StoryDetailsPage() {
   const [isFollowing, setIsFollowing] = useState(false)
   const [followStatusState, setFollowStatusState] = useState<'idle' | 'loading' | 'processing' | 'error'>('idle')
   const [followMessage, setFollowMessage] = useState<string>('')
+  const session = typeof window !== 'undefined' ? localStorage.getItem('vtelltales_user') : null
+  const currentUser = session ? (() => {
+    try {
+      return JSON.parse(session) as { id?: string; name?: string; profileImg?: string }
+    } catch {
+      return null
+    }
+  })() : null
+  const userId = currentUser?.id ?? (typeof window !== 'undefined' ? localStorage.getItem('userId') : null)
 
   useEffect(() => {
     let cancelled = false
@@ -80,16 +88,21 @@ export function StoryDetailsPage() {
     setFollowStatusState('loading')
     setFollowMessage('')
 
+    if (!userId) {
+      setFollowStatusState('idle')
+      return
+    }
+
     fetchFanClub(story.userid)
       .then((fans) => {
-        setIsFollowing(fans.includes(DEFAULT_USER_ID))
+        setIsFollowing(fans.includes(userId))
         setFollowStatusState('idle')
       })
       .catch((err) => {
         setFollowStatusState('error')
         setFollowMessage((err as Error).message)
       })
-  }, [story?.userid])
+  }, [story?.userid, userId])
 
   const loadComments = useCallback(async () => {
     if (!story) return
@@ -112,10 +125,19 @@ export function StoryDetailsPage() {
   const handleAddComment = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!story || !commentText.trim()) return
+    if (!userId) {
+      setCommentsError('You need to be signed in to comment.')
+      return
+    }
 
     setPostingComment(true)
     try {
-      await addStoryComment(story.storyid, commentText.trim())
+      await addStoryComment(
+        story.storyid,
+        commentText.trim(),
+        userId,
+        currentUser?.name ?? 'VTellTales User'
+      )
       setCommentText('')
       setStory((prev) => (prev ? { ...prev, storycomment: prev.storycomment + 1 } : prev))
       await loadComments()
@@ -128,10 +150,14 @@ export function StoryDetailsPage() {
 
   const handleLike = async () => {
     if (!story || likePending) return
+    if (!userId) {
+      setCommentsError('Please sign in to like stories.')
+      return
+    }
 
     setLikePending(true)
     try {
-      await likeStory(story.storyid)
+      await likeStory(story.storyid, userId)
       setStory((prev) => (prev ? { ...prev, storylike: prev.storylike + 1 } : prev))
     } catch (err) {
       setCommentsError((err as Error).message)
@@ -142,11 +168,16 @@ export function StoryDetailsPage() {
 
   const handleFollow = async () => {
     if (!story) return
+    if (!userId) {
+      setFollowStatusState('error')
+      setFollowMessage('Sign in to follow authors.')
+      return
+    }
     setFollowStatusState('processing')
     setFollowMessage('')
 
     try {
-      await addFollowing({ userid: DEFAULT_USER_ID, followingid: story.userid })
+      await addFollowing({ userid: userId, followingid: story.userid })
       setIsFollowing(true)
       setFollowMessage(`Now following ${story.followername || story.userid}`)
       setFollowStatusState('idle')
@@ -158,11 +189,16 @@ export function StoryDetailsPage() {
 
   const handleUnfollow = async () => {
     if (!story) return
+    if (!userId) {
+      setFollowStatusState('error')
+      setFollowMessage('Sign in to manage following.')
+      return
+    }
     setFollowStatusState('processing')
     setFollowMessage('')
 
     try {
-      await unFollowing({ userid: DEFAULT_USER_ID, followingid: story.userid })
+      await unFollowing({ userid: userId, followingid: story.userid })
       setIsFollowing(false)
       setFollowMessage(`Unfollowed ${story.followername || story.userid}`)
       setFollowStatusState('idle')
@@ -231,26 +267,28 @@ export function StoryDetailsPage() {
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   <button
                     onClick={handleLike}
-                    disabled={likePending}
+                    disabled={likePending || !userId}
                     className="inline-flex items-center gap-2 rounded-2xl border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {likePending ? 'Liking…' : '♥ Like story'}
+                    {likePending ? 'Liking…' : userId ? '♥ Like story' : 'Sign in to like'}
                   </button>
-                <button
-                  onClick={isFollowing ? handleUnfollow : handleFollow}
-                  disabled={followStatusState === 'processing' || followStatusState === 'loading'}
-                  className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                    isFollowing
-                      ? 'border-red-500 text-red-600 hover:bg-red-50'
-                      : 'border-primary-blue text-primary-blue hover:bg-primary-blue/10'
-                  }`}
-                >
-                  {followStatusState === 'processing' || followStatusState === 'loading'
-                    ? 'Updating…'
-                    : isFollowing
-                    ? 'Unfollow author'
-                    : 'Follow author'}
-                </button>
+                  <button
+                    onClick={isFollowing ? handleUnfollow : handleFollow}
+                    disabled={followStatusState === 'processing' || followStatusState === 'loading' || !userId}
+                    className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                      isFollowing && userId
+                        ? 'border-red-500 text-red-600 hover:bg-red-50'
+                        : 'border-primary-blue text-primary-blue hover:bg-primary-blue/10'
+                    } disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    {followStatusState === 'processing' || followStatusState === 'loading'
+                      ? 'Updating…'
+                      : !userId
+                        ? 'Sign in to follow'
+                        : isFollowing
+                          ? 'Unfollow author'
+                          : 'Follow author'}
+                  </button>
                   <span className="text-sm text-gray-500">Live likes: {story.storylike}</span>
                   <span className="text-sm text-gray-500">{comments.length} comments loaded</span>
                 </div>
@@ -323,9 +361,9 @@ export function StoryDetailsPage() {
                   <button
                     type="submit"
                     className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary-blue to-accent-purple px-4 py-2 text-sm font-semibold text-white transition hover:from-primary-blue/90 hover:to-accent-purple/90 disabled:opacity-60 disabled:cursor-not-allowed"
-                    disabled={postingComment || !commentText.trim()}
+                    disabled={postingComment || !commentText.trim() || !userId}
                   >
-                    {postingComment ? 'Posting…' : 'Post comment'}
+                    {postingComment ? 'Posting…' : userId ? 'Post comment' : 'Sign in to comment'}
                   </button>
                 </div>
                 {commentsError && (

@@ -55,7 +55,7 @@ namespace VTellTales_WA.API.Controllers
 
             assetCdn = (Environment.GetEnvironmentVariable("ASSET_CDN")
                         ?? configuration["AssetStorage:Cdn"]
-                        ?? "https://data.vtelltales.com").TrimEnd('/');
+                        ?? "https://webapp.vtelltales.com/data").TrimEnd('/');
 
             ipath = Path.Combine(assetRoot, "userimages") + Path.DirectorySeparatorChar;
             dbpath = assetCdn + "/userimages/";
@@ -69,7 +69,7 @@ namespace VTellTales_WA.API.Controllers
             gallerypath = Path.Combine(assetRoot, "gallerydata") + Path.DirectorySeparatorChar;
             gallerydbpath = assetCdn + "/gallerydata/";
 
-            subdomain = "api.vtelltales.com";
+            subdomain = "webapp.vtelltales.com";
             domain = new UriBuilder(assetCdn).Uri.Host;
         }
 
@@ -163,6 +163,88 @@ namespace VTellTales_WA.API.Controllers
             IStoryDataBL iStoryDataBL = new StoryDataBL(configuration);
             List<StoryDataDTO> storyDataDTO = iStoryDataBL.GetTopStory(userId);
             return Json(storyDataDTO);
+        }
+
+        [HttpGet("GetCollaborators/{storyId}")]
+        public IActionResult GetCollaborators(int storyId)
+        {
+            try
+            {
+                IStoryDataBL bl = new StoryDataBL(configuration);
+                var collab = bl.GetCollaborators(storyId);
+                return Ok(collab);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error getting collaborators");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
+
+        [HttpPost("InviteCollaborator")]
+        public IActionResult InviteCollaborator([FromBody] VTellTales_WA.DTO.CollaboratorDTO collaborator)
+        {
+            try
+            {
+                if (collaborator == null) return BadRequest(new { error = "Invalid payload" });
+                IStoryDataBL bl = new StoryDataBL(configuration);
+                var list = bl.AddCollaborator(collaborator);
+                return Ok(list);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error inviting collaborator");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
+
+        [HttpPut("Collaborators/{storyId}/{collaboratorId}")]
+        public IActionResult UpdateCollaborator(int storyId, string collaboratorId, [FromBody] VTellTales_WA.DTO.CollaboratorDTO collaborator)
+        {
+            try
+            {
+                if (collaborator == null) return BadRequest(new { error = "Invalid payload" });
+                IStoryDataBL bl = new StoryDataBL(configuration);
+                var list = bl.UpdateCollaborator(storyId, collaboratorId, collaborator);
+                return Ok(list);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error updating collaborator");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
+        }
+
+        [HttpDelete("Collaborators/{storyId}/{collaboratorId}")]
+        public IActionResult DeleteCollaborator(int storyId, string collaboratorId)
+        {
+            try
+            {
+                IStoryDataBL bl = new StoryDataBL(configuration);
+                var list = bl.DeleteCollaborator(storyId, collaboratorId);
+                return Ok(list);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error deleting collaborator");
+                return StatusCode(500, new { error = "Internal server error" });
+            }
         }
 
         [HttpGet("Storyfan/{userId}")]
@@ -673,7 +755,7 @@ namespace VTellTales_WA.API.Controllers
                     fileName = Guid.NewGuid().ToString() + extension; //Create a new Name for the file due to security reasons.
                                                                       //var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
                     path = Path.Combine(Directory.GetCurrentDirectory(), "userimages\\", fileName);
-                    spath = Path.Combine("https://data.vtelltales.com/userimages/", fileName);
+                    spath = $"https://webapp.vtelltales.com/data/userimages/{fileName}";
                     path = path.Replace(subdomain, domain);
                     //path = Path.Combine("C:\\Inetpub\\vhosts\\bdvcard.com\\httpdocs\\userimages\\" , profileDataDTO.userid , fileName);
                     //   filePath = "F:\\TSI\\2020\\PfxDemo.WebAPI\\PfxDemo.WebAPI\\Userimage\\" + vr.UserId + unixTimestamp + ".jpg"; ;
@@ -739,7 +821,7 @@ namespace VTellTales_WA.API.Controllers
                     fileName = Guid.NewGuid().ToString() + extension; //Create a new Name for the file due to security reasons.
                                                                       //var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", fileName);
                     path = Path.Combine(Directory.GetCurrentDirectory(), "storydata\\" + storyPagesDTO.userid, fileName);
-                    spath = Path.Combine("https://data.vtelltales.com/" + "storydata/" + storyPagesDTO.userid, fileName);
+                    spath = $"https://webapp.vtelltales.com/data/storydata/{storyPagesDTO.userid}/{fileName}";
                     path = path.Replace(subdomain, domain);
 
                     var dpath = Path.Combine(Directory.GetCurrentDirectory(), "storydata\\ " + storyPagesDTO.userid);

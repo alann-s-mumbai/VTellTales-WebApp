@@ -322,6 +322,44 @@ namespace VTellTales_WA.BL
             return storyDataDL.AddStoryReportBlock(storyReportBlockDataDTO);
         }
 
+        // Collaborations
+        public System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> GetCollaborators(int storyId)
+        {
+            var list = new System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO>();
+            if (storyId <= 0) return list;
+            IStoryDataDL storyDataDL = new StoryDataDL(configuration);
+            try
+            {
+                list = storyDataDL.GetCollaborators(storyId);
+            }
+            catch
+            {
+                // bubble up - caller will surface
+                throw;
+            }
+            return list;
+        }
+
+        public System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> AddCollaborator(VTellTales_WA.DTO.CollaboratorDTO collaborator)
+        {
+            if (collaborator == null) return new System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO>();
+            IStoryDataDL storyDataDL = new StoryDataDL(configuration);
+            return storyDataDL.AddCollaborator(collaborator);
+        }
+
+        public System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> UpdateCollaborator(int storyId, string collaboratorId, VTellTales_WA.DTO.CollaboratorDTO collaborator)
+        {
+            if (storyId <= 0 || string.IsNullOrEmpty(collaboratorId) || collaborator == null) return new System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO>();
+            IStoryDataDL storyDataDL = new StoryDataDL(configuration);
+            return storyDataDL.UpdateCollaborator(storyId, collaboratorId, collaborator);
+        }
+
+        public System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> DeleteCollaborator(int storyId, string collaboratorId)
+        {
+            if (storyId <= 0 || string.IsNullOrEmpty(collaboratorId)) return new System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO>();
+            IStoryDataDL storyDataDL = new StoryDataDL(configuration);
+            return storyDataDL.DeleteCollaborator(storyId, collaboratorId);
+        }
         public int AddserReportBlock(UserReportBlockDataDTO userReportBlockDataDTO)
         {
             if (userReportBlockDataDTO == null || string.IsNullOrEmpty(userReportBlockDataDTO.reportblockUser))

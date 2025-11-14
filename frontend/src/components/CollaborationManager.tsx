@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Users, UserPlus, Settings, Crown, Shield, Eye, Edit3, MessageCircle, Clock, Share2, X } from 'lucide-react';
+import { API_BASE_URL } from '../services/api';
 
 interface Collaborator {
   id: string;
@@ -39,102 +40,73 @@ const CollaborationManager: React.FC<CollaborationManagerProps> = ({
   const [linkAccess, setLinkAccess] = useState<'restricted' | 'anyone-with-link' | 'public'>('restricted');
   const [isInviting, setIsInviting] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  const loadCollaborators = useCallback(async () => {
+    try {
+      setLoadError(null);
+      const response = await fetch(`${API_BASE_URL}/storyapi/StoryBook/GetCollaborators/${storyId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = (await response.json()) as Collaborator[];
+      setCollaborators(data);
+      onCollaboratorUpdate?.(data);
+      setActionMessage(null);
+      setActionError(null);
+    } catch (error) {
+      console.error('Failed to load collaborators:', error);
+      setLoadError('Unable to load collaborators for this story.');
+      setCollaborators([]);
+      onCollaboratorUpdate?.([]);
+    }
+  }, [onCollaboratorUpdate, storyId]);
+
+  const generateShareLink = useCallback(() => {
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/story/${storyId}?share=true`;
+    setShareLink(link);
+  }, [storyId]);
 
   useEffect(() => {
     if (isVisible) {
       loadCollaborators();
       generateShareLink();
     }
-  }, [isVisible, storyId]);
-
-  const loadCollaborators = async () => {
-    try {
-      // Mock data - replace with actual API call
-      const mockCollaborators: Collaborator[] = [
-        {
-          id: currentUserId,
-          name: 'You',
-          email: 'user@example.com',
-          role: 'owner',
-          isOnline: true,
-          lastSeen: 'Now',
-          permissions: {
-            canEdit: true,
-            canComment: true,
-            canShare: true,
-            canManageCollaborators: true
-          }
-        },
-        {
-          id: '2',
-          name: 'Alice Johnson',
-          email: 'alice@example.com',
-          role: 'editor',
-          isOnline: true,
-          lastSeen: 'Now',
-          permissions: {
-            canEdit: true,
-            canComment: true,
-            canShare: false,
-            canManageCollaborators: false
-          }
-        },
-        {
-          id: '3',
-          name: 'Bob Smith',
-          email: 'bob@example.com',
-          role: 'commenter',
-          isOnline: false,
-          lastSeen: '2 hours ago',
-          permissions: {
-            canEdit: false,
-            canComment: true,
-            canShare: false,
-            canManageCollaborators: false
-          }
-        }
-      ];
-      
-      setCollaborators(mockCollaborators);
-      onCollaboratorUpdate?.(mockCollaborators);
-    } catch (error) {
-      console.error('Failed to load collaborators:', error);
-    }
-  };
-
-  const generateShareLink = () => {
-    const baseUrl = window.location.origin;
-    const link = `${baseUrl}/story/${storyId}?share=true`;
-    setShareLink(link);
-  };
+  }, [isVisible, loadCollaborators, generateShareLink]);
 
   const inviteCollaborator = async () => {
     if (!inviteEmail.trim()) return;
 
     setIsInviting(true);
+    setInviteError(null);
+    setActionMessage(null);
     
     try {
-      // Mock API call - replace with actual invitation logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const permissions = getPermissionsByRole(inviteRole);
-      const newCollaborator: Collaborator = {
-        id: Date.now().toString(),
-        name: inviteEmail.split('@')[0],
-        email: inviteEmail,
-        role: inviteRole,
-        isOnline: false,
-        lastSeen: 'Invited',
-        permissions
-      };
-      
-      setCollaborators(prev => [...prev, newCollaborator]);
+      const response = await fetch(`${API_BASE_URL}/storyapi/StoryBook/InviteCollaborator`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storyId,
+          email: inviteEmail,
+          role: inviteRole,
+          requestedBy: currentUserId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       setInviteEmail('');
-      
-      // Show success message
-      console.log(`Invitation sent to ${inviteEmail}`);
+      await loadCollaborators();
+      setActionMessage('Invitation sent successfully.');
     } catch (error) {
       console.error('Failed to send invitation:', error);
+      setInviteError('We could not send this invitation. Please try again later.');
     } finally {
       setIsInviting(false);
     }
@@ -142,20 +114,34 @@ const CollaborationManager: React.FC<CollaborationManagerProps> = ({
 
   const removeCollaborator = async (collaboratorId: string) => {
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setCollaborators(prev => prev.filter(c => c.id !== collaboratorId));
+      setActionError(null);
+      const response = await fetch(`${API_BASE_URL}/storyapi/StoryBook/Collaborators/${storyId}/${collaboratorId}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      await loadCollaborators();
+      setActionMessage('Collaborator removed.');
     } catch (error) {
       console.error('Failed to remove collaborator:', error);
+      setActionError('Unable to remove collaborator. Please try again later.');
     }
   };
 
   const updateCollaboratorRole = async (collaboratorId: string, newRole: Collaborator['role']) => {
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      setActionError(null);
+      const response = await fetch(`${API_BASE_URL}/storyapi/StoryBook/Collaborators/${storyId}/${collaboratorId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       const permissions = getPermissionsByRole(newRole);
       setCollaborators(prev =>
         prev.map(c =>
@@ -164,8 +150,10 @@ const CollaborationManager: React.FC<CollaborationManagerProps> = ({
             : c
         )
       );
+      setActionMessage('Collaborator role updated.');
     } catch (error) {
       console.error('Failed to update collaborator role:', error);
+      setActionError('Unable to update collaborator role. Please try again later.');
     }
   };
 
@@ -291,12 +279,29 @@ const CollaborationManager: React.FC<CollaborationManagerProps> = ({
                   <span>{isInviting ? 'Inviting...' : 'Invite'}</span>
                 </button>
               </div>
+              {inviteError && (
+                <p className="text-sm text-red-600">{inviteError}</p>
+              )}
             </div>
           )}
 
           {/* Current Collaborators */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">People with access</h3>
+            {loadError && (
+              <p className="text-sm text-red-600">{loadError}</p>
+            )}
+            {!loadError && collaborators.length === 0 && (
+              <p className="text-sm text-gray-500">
+                No collaborators found for this story yet.
+              </p>
+            )}
+            {actionMessage && (
+              <p className="text-sm text-green-600">{actionMessage}</p>
+            )}
+            {actionError && (
+              <p className="text-sm text-red-600">{actionError}</p>
+            )}
             
             <div className="space-y-3">
               {collaborators.map((collaborator) => (
@@ -403,6 +408,14 @@ const CollaborationManager: React.FC<CollaborationManagerProps> = ({
                       <option value="anyone-with-link">Anyone with the link</option>
                       <option value="public">Public - Anyone can find and view</option>
                     </select>
+                    <p className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                      <Shield className="h-3.5 w-3.5 text-gray-400" />
+                      {linkAccess === 'restricted'
+                        ? 'A secure link that keeps collaboration limited to invited members.'
+                        : linkAccess === 'anyone-with-link'
+                          ? 'Anyone holding the link can access this story.'
+                          : 'The story is discoverable by anyone on the platform.'}
+                    </p>
                   </div>
                 </div>
               )}

@@ -64,7 +64,7 @@ server {
     
     # Backend API - Proxy to dotnet
     location /api/ {
-        proxy_pass http://localhost:5000/;
+        proxy_pass http://127.0.0.1:5001/;
         # ... CORS headers and proxy settings
     }
 }
@@ -75,7 +75,7 @@ server {
     server_name webapi.vtelltales.com;
     
     location / {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://127.0.0.1:5001;
         # ... CORS headers
     }
 }

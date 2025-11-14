@@ -149,7 +149,9 @@ export class PerformanceService {
     apiCalls: 0,
     imageLoads: 0,
     bundleSize: 0,
-    loadTimes: [] as number[]
+    loadTimes: [] as number[],
+    connectionType: null as string | null,
+    connectionDownlink: null as number | null
   };
 
   // Lazy loading observer
@@ -342,6 +344,11 @@ export class PerformanceService {
       
       // This would need to integrate with React rendering
       console.log(`Lazy loaded component: ${componentName}`);
+      
+      if (Component) {
+        element.setAttribute('data-component-loaded', 'true');
+        (element as unknown as { __vtComponent?: unknown }).__vtComponent = Component;
+      }
     } catch (error) {
       console.error(`Failed to load component: ${componentName}`, error);
     }
@@ -351,6 +358,10 @@ export class PerformanceService {
   measureBundleSize(): void {
     if ('navigator' in window && 'connection' in navigator) {
       const connection = (navigator as any).connection;
+      if (connection) {
+        this.metrics.connectionType = connection.effectiveType ?? connection.type ?? null;
+        this.metrics.connectionDownlink = typeof connection.downlink === 'number' ? connection.downlink : null;
+      }
       
       // Estimate bundle size based on network timing
       const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;

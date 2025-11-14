@@ -24,7 +24,7 @@
 
 ### ✅ Nginx Configuration
 - **Frontend**: Direct file serving from `/var/www/webapp.vtelltales.com/app/`
-- **API Proxy**: `/api/` routes to `http://localhost:5000/`
+- **API Proxy**: `/api/` routes to `http://127.0.0.1:5001/`
 - **Status**: ✅ **ACTIVE** with unified domain configuration
 
 ---
@@ -45,7 +45,7 @@
 ```
 Internet → webapp.vtelltales.com
     ├── / (Static Files) → /var/www/webapp.vtelltales.com/app/
-    └── /api/ (Proxy) → localhost:5000 → VTellTales_WA.API.dll
+   └── /api/ (Proxy) → 127.0.0.1:5001 → VTellTales_WA.API.dll
         └── Database → VTellTales_Web_db (MariaDB:3306)
 ```
 
@@ -102,7 +102,7 @@ Internet → webapp.vtelltales.com
 - [✅] File permissions correct (www-data)
 
 ### 🔍 API Endpoint Status:
-- **Service**: Running on localhost:5000 ✅
+- **Service**: Running on 127.0.0.1:5001 ✅
 - **External Access**: Being finalized
 - **Database Connection**: Production configured
 
@@ -125,7 +125,7 @@ systemctl status vtelltales-api
 journalctl -u vtelltales-api -f
 
 # Test direct API
-curl http://localhost:5000/storyapi/StoryBook/getallstorytype
+curl http://127.0.0.1:5001/storyapi/StoryBook/getallstorytype
 ```
 
 ---

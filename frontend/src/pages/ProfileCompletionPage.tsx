@@ -20,11 +20,12 @@ export function ProfileCompletionPage() {
   const state = location.state as LocationState
   
   const [formData, setFormData] = useState<ProfileCompletionData>({
-    firstName: 'John', // Demo placeholder data
-    lastName: 'Doe'    // Demo placeholder data
+    firstName: '',
+    lastName: ''
   })
   const [errors, setErrors] = useState<Partial<ProfileCompletionData>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Load existing profile data for editing
   useEffect(() => {
@@ -35,17 +36,14 @@ export function ProfileCompletionPage() {
           const profile = await fetchProfile(userId)
           if (profile?.name) {
             const nameParts = profile.name.split(' ')
-            if (nameParts.length >= 2) {
-              setFormData({
-                firstName: nameParts[0] || 'John',
-                lastName: nameParts.slice(1).join(' ') || 'Doe'
-              })
-            }
+            setFormData({
+              firstName: nameParts[0] ?? '',
+              lastName: nameParts.slice(1).join(' ') ?? ''
+            })
           }
         }
       } catch (error) {
         console.error('Error loading profile data:', error)
-        // Keep default demo data if loading fails
       }
     }
 
@@ -83,9 +81,14 @@ export function ProfileCompletionPage() {
     }
 
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
-      // Get current user ID from localStorage or use demo fallback
-      const userId = localStorage.getItem('userId') || 'demo-user-fallback'
+      const userId = localStorage.getItem('userId')
+      if (!userId) {
+        setSubmitError('You need to be signed in to complete your profile.')
+        setIsSubmitting(false)
+        return
+      }
       
       // Combine first and last name for the name field
       const fullName = `${formData.firstName} ${formData.lastName}`.trim()
@@ -96,15 +99,12 @@ export function ProfileCompletionPage() {
         // Add other fields as we expand
       })
 
-      // Mark profile as completed
-      localStorage.setItem('profileCompleted', 'true')
-      
       // Redirect to the intended page or dashboard
       const redirectTo = state?.from?.pathname || '/dashboard'
       navigate(redirectTo, { replace: true })
     } catch (error) {
       console.error('Profile completion failed:', error)
-      console.error('Profile completion failed:', error)
+      setSubmitError('We were unable to save your profile. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -118,11 +118,14 @@ export function ProfileCompletionPage() {
           <p className="text-gray-600">
             Please provide the required information to continue
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4 text-sm text-blue-700">
-            <strong>Demo Note:</strong> We&apos;ve pre-filled some dummy data below. Please edit these fields with your actual information.
-          </div>
           <div className="w-16 h-1 bg-gradient-to-r from-primary-blue to-accent-orange mx-auto mt-4 rounded-full"></div>
         </div>
+        
+        {submitError && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {submitError}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* First Name - Required */}

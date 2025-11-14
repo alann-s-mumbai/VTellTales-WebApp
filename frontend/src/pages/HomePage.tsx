@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchStoriesByPage, fetchStoryTypes, StoryData, StoryType } from '../services/api'
-import { Search, Filter, Grid, List, TrendingUp, Clock, Heart, Star } from 'lucide-react'
+import { Search, Grid, List, TrendingUp, Clock, Heart } from 'lucide-react'
 
 const landingFilters = [
   { id: 'all', label: 'All Stories', icon: Grid },
@@ -20,7 +20,6 @@ export function HomePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +59,15 @@ export function HomePage() {
   const filteredStories = useMemo(() => {
     let filtered = stories
     
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase()
+      filtered = filtered.filter(story =>
+        (story.storytitle || '').toLowerCase().includes(query) ||
+        (story.storydesc || '').toLowerCase().includes(query) ||
+        (story.followername || '').toLowerCase().includes(query)
+      )
+    }
+    
     // Filter by category
     if (categoryFilter !== 'All Categories') {
       filtered = filtered.filter(story => (story.storytype || 'Uncategorized') === categoryFilter)
@@ -67,13 +75,13 @@ export function HomePage() {
     
     // Filter by landing filter (sorting)
     switch (selectedFilter) {
-      case 'Most Popular':
+      case 'popular':
         filtered = [...filtered].sort((a, b) => (b.storyview || 0) - (a.storyview || 0))
         break
-      case 'Recently Added':
+      case 'recent':
         filtered = [...filtered].sort((a, b) => new Date(b.createdate || '').getTime() - new Date(a.createdate || '').getTime())
         break
-      case 'Most Liked':
+      case 'liked':
         filtered = [...filtered].sort((a, b) => (b.storylike || 0) - (a.storylike || 0))
         break
       default: // 'All Stories'
@@ -81,7 +89,7 @@ export function HomePage() {
     }
     
     return filtered
-  }, [stories, categoryFilter, selectedFilter])
+  }, [stories, categoryFilter, selectedFilter, searchQuery])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -101,19 +109,64 @@ export function HomePage() {
               {isLoading ? 'Loading stories...' : error ? 'Unable to load stories' : `${stories.length} stories available`} • Filter by category and popularity
             </p>
             <div className="flex flex-wrap gap-3">
-              {landingFilters.map((filter) => (
+              {landingFilters.map((filter) => {
+                const Icon = filter.icon
+                return (
+                  <button
+                    key={filter.id}
+                    onClick={() => setSelectedFilter(filter.id)}
+                    className={`flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.4em] transition ${
+                      selectedFilter === filter.id
+                        ? 'border border-primary-blue bg-primary-blue/10 text-primary-blue'
+                        : 'border border-gray-200 bg-white text-gray-500 hover:border-primary-blue'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {filter.label}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="relative flex-1 min-w-[240px]">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search stories"
+                  className="w-full rounded-full border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-600 focus:border-primary-blue focus:outline-none focus:ring-2 focus:ring-primary-blue/40"
+                  aria-label="Search stories"
+                />
+              </div>
+              <div className="flex items-center gap-2">
                 <button
-                  key={filter}
-                  onClick={() => setSelectedFilter(filter)}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.4em] transition ${
-                    selectedFilter === filter
-                      ? 'border border-primary-blue bg-primary-blue/10 text-primary-blue'
-                      : 'border border-gray-200 bg-white text-gray-500 hover:border-primary-blue'
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
+                    viewMode === 'grid'
+                      ? 'border-primary-blue bg-primary-blue text-white'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-primary-blue'
                   }`}
+                  aria-pressed={viewMode === 'grid'}
                 >
-                  {filter}
+                  <Grid className="h-4 w-4" />
+                  Grid
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
+                    viewMode === 'list'
+                      ? 'border-primary-blue bg-primary-blue text-white'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-primary-blue'
+                  }`}
+                  aria-pressed={viewMode === 'list'}
+                >
+                  <List className="h-4 w-4" />
+                  List
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -176,7 +229,11 @@ export function HomePage() {
             </div>
           </header>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            className={`mt-6 grid gap-4 ${
+              viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+            }`}
+          >
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="rounded-3xl border border-gray-100 bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm animate-pulse">

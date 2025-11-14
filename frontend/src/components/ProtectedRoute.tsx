@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { checkProfileCompletion, DEFAULT_USER_ID } from '../services/api'
+import { checkProfileCompletion } from '../services/api'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -10,28 +10,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isProfileComplete, setIsProfileComplete] = useState(false)
   const location = useLocation()
+  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
 
   useEffect(() => {
     const checkProfile = async () => {
       try {
-        // Get current user ID - in a real app this would come from auth context
-        const userId = localStorage.getItem('userId') || DEFAULT_USER_ID
-        
-        // Check if profile is marked as completed in localStorage (for demo)
-        const profileCompleted = localStorage.getItem('profileCompleted') === 'true'
-        if (profileCompleted) {
-          setIsProfileComplete(true)
+        if (!userId) {
+          setIsProfileComplete(false)
           setIsLoading(false)
           return
         }
 
-        // Check profile completion via API
         const isComplete = await checkProfileCompletion(userId)
         setIsProfileComplete(isComplete)
-        
-        if (isComplete) {
-          localStorage.setItem('profileCompleted', 'true')
-        }
       } catch (error) {
         console.error('Error checking profile:', error)
         setIsProfileComplete(false)
@@ -41,7 +32,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     checkProfile()
-  }, [])
+  }, [userId])
 
   if (isLoading) {
     return (
@@ -52,6 +43,10 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         </div>
       </div>
     )
+  }
+
+  if (!userId) {
+    return <Navigate to="/login" state={{ from: location }} replace />
   }
 
   if (!isProfileComplete) {

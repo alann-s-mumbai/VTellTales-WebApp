@@ -1,5 +1,5 @@
 import React from 'react'
-import { Search, Filter, X, TrendingUp, Clock, Heart, Grid, List, Star } from 'lucide-react'
+import { Search, Filter, X, TrendingUp, Clock, Heart, Grid, List } from 'lucide-react'
 
 interface SearchAndFiltersProps {
   searchQuery: string

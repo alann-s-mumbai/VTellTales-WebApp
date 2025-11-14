@@ -9,7 +9,7 @@ using System.IO;
 
 namespace VTellTales_WA.DL
 {
-    public class StoryDataDL : IStoryDataDL
+    public partial class StoryDataDL : IStoryDataDL
     {
         private readonly IConfiguration configuration;
         readonly string connString;
@@ -30,18 +30,20 @@ namespace VTellTales_WA.DL
                 cmd.Parameters.AddWithValue("@storyid", storyid);
 
                 using (var reader = cmd.ExecuteReader())
+                {
                     while (reader.Read())
                     {
                         profileDataDTO = new ProfileDataDTO
                         {
                             userid = reader.GetFieldValue<string>(0),
-                            
                         };
                     }
-            }
+                }
 
-            return profileDataDTO;
+                return profileDataDTO;
+            }
         }
+
         public StoryDataDTO? GetStory(string userID, int storyID)
         {
             StoryDataDTO? storyDataDTO = null;
@@ -879,7 +881,7 @@ namespace VTellTales_WA.DL
             try
             {
                 var dpath = Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "userimages\\") + userid + "\\" + storypagefile.Substring(storypagefile.LastIndexOf("\\")));
-                dpath = dpath.Replace("api.vtelltales.com", "data.vtelltales.com");
+                dpath = dpath.Replace("api.vtelltales.com", "webapp.vtelltales.com/data");
                 FileInfo file = new FileInfo(dpath);
                 if (file.Exists)//check file exsit or not.
                 {
@@ -898,7 +900,7 @@ namespace VTellTales_WA.DL
             try
             {
                 var dpath = Path.Combine(Path.Combine(Directory.GetCurrentDirectory(), "storydata\\") + userid + "\\" + storypagefile.Substring(storypagefile.LastIndexOf("/")));
-                dpath = dpath.Replace("api.vtelltales.com", "data.vtelltales.com");
+                dpath = dpath.Replace("api.vtelltales.com", "webapp.vtelltales.com/data");
                 FileInfo file = new FileInfo(dpath);
                 if (file.Exists)//check file exsit or not.
                 {
@@ -1097,8 +1099,115 @@ namespace VTellTales_WA.DL
             return storyCommentDTO;
         }
 
+        // Collaboration methods
+        public List<CollaboratorDTO> GetCollaborators(int storyId)
+        {
+            var list = new List<CollaboratorDTO>();
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                cmd.CommandText = @"SELECT id,storyid,collaboratorid,name,email,role,permissions,DATE_FORMAT(createdate, '%Y-%m-%d %H:%i:%s'),DATE_FORMAT(updatedate, '%Y-%m-%d %H:%i:%s') FROM story_collaborators WHERE storyid=@storyid";
+                cmd.Parameters.AddWithValue("@storyid", storyId);
+                using (var reader = cmd.ExecuteReader())
+                    while (reader.Read())
+                    {
+                        var dto = new CollaboratorDTO
+                        {
+                            id = reader.GetInt32(0),
+                            storyid = reader.GetInt32(1),
+                            collaboratorid = reader.IsDBNull(2) ? string.Empty : reader.GetString(2),
+                            name = reader.IsDBNull(3) ? string.Empty : reader.GetString(3),
+                            email = reader.IsDBNull(4) ? string.Empty : reader.GetString(4),
+                            role = reader.IsDBNull(5) ? string.Empty : reader.GetString(5),
+                            permissions = reader.IsDBNull(6) ? null : reader.GetString(6),
+                            createdate = reader.IsDBNull(7) ? DateTime.MinValue : DateTime.Parse(reader.GetString(7)),
+                            updatedate = reader.IsDBNull(8) ? DateTime.MinValue : DateTime.Parse(reader.GetString(8)),
+                        };
+                        list.Add(dto);
+                    }
+            }
+            return list;
+        }
 
+        public List<CollaboratorDTO> AddCollaborator(CollaboratorDTO collaborator)
+        {
+            if (collaborator == null) return new List<CollaboratorDTO>();
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                // validate story exists
+                cmd.CommandText = "SELECT COUNT(1) FROM userstory WHERE storyid=@storyid";
+                cmd.Parameters.AddWithValue("@storyid", collaborator.storyid);
+                var exists = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+                if (exists == 0) throw new InvalidOperationException("Story does not exist");
 
+                // validate collaborator user exists
+                cmd.Parameters.Clear();
+                cmd.CommandText = "SELECT COUNT(1) FROM usertbl WHERE userid=@userid";
+                cmd.Parameters.AddWithValue("@userid", collaborator.collaboratorid);
+                var userExists = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+                if (userExists == 0) throw new InvalidOperationException("Collaborator user does not exist");
 
+                // insert
+                cmd.Parameters.Clear();
+                cmd.CommandText = @"INSERT INTO story_collaborators (storyid, collaboratorid, name, email, role, permissions, createdate, updatedate)
+                                     VALUES (@storyid,@collaboratorid,@name,@email,@role,@permissions,NOW(),NOW())";
+                cmd.Parameters.AddWithValue("@storyid", collaborator.storyid);
+                cmd.Parameters.AddWithValue("@collaboratorid", collaborator.collaboratorid);
+                cmd.Parameters.AddWithValue("@name", collaborator.name);
+                cmd.Parameters.AddWithValue("@email", collaborator.email);
+                cmd.Parameters.AddWithValue("@role", collaborator.role);
+                cmd.Parameters.AddWithValue("@permissions", collaborator.permissions ?? (object)DBNull.Value);
+                cmd.ExecuteNonQuery();
+            }
+            return GetCollaborators(collaborator.storyid);
+        }
+
+        public List<CollaboratorDTO> UpdateCollaborator(int storyId, string collaboratorId, CollaboratorDTO collaborator)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                // validate story exists
+                cmd.CommandText = "SELECT COUNT(1) FROM userstory WHERE storyid=@storyid";
+                cmd.Parameters.AddWithValue("@storyid", storyId);
+                var exists = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+                if (exists == 0) throw new InvalidOperationException("Story does not exist");
+
+                cmd.Parameters.Clear();
+                cmd.CommandText = @"UPDATE story_collaborators SET name=@name, email=@email, role=@role, permissions=@permissions, updatedate=NOW()
+                                     WHERE storyid=@storyid AND collaboratorid=@collaboratorid";
+                cmd.Parameters.AddWithValue("@storyid", storyId);
+                cmd.Parameters.AddWithValue("@collaboratorid", collaboratorId);
+                cmd.Parameters.AddWithValue("@name", collaborator.name);
+                cmd.Parameters.AddWithValue("@email", collaborator.email);
+                cmd.Parameters.AddWithValue("@role", collaborator.role);
+                cmd.Parameters.AddWithValue("@permissions", collaborator.permissions ?? (object)DBNull.Value);
+                var affected = cmd.ExecuteNonQuery();
+                if (affected == 0) throw new InvalidOperationException("Collaborator not found");
+            }
+            return GetCollaborators(storyId);
+        }
+
+        public List<CollaboratorDTO> DeleteCollaborator(int storyId, string collaboratorId)
+        {
+            using (MySqlDatabase db = new MySqlDatabase(connString))
+            {
+                var cmd = db.Connection.CreateCommand() as MySqlCommand;
+                // validate story exists
+                cmd.CommandText = "SELECT COUNT(1) FROM userstory WHERE storyid=@storyid";
+                cmd.Parameters.AddWithValue("@storyid", storyId);
+                var exists = Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+                if (exists == 0) throw new InvalidOperationException("Story does not exist");
+
+                cmd.Parameters.Clear();
+                cmd.CommandText = "DELETE FROM story_collaborators WHERE storyid=@storyid AND collaboratorid=@collaboratorid";
+                cmd.Parameters.AddWithValue("@storyid", storyId);
+                cmd.Parameters.AddWithValue("@collaboratorid", collaboratorId);
+                cmd.ExecuteNonQuery();
+            }
+            return GetCollaborators(storyId);
+        }
     }
+
 }

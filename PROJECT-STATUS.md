@@ -7,7 +7,7 @@
 - ✅ Created `start-dev.sh` - full development environment script  
 - ✅ Created `stop-dev.sh` - clean shutdown script
 - ✅ Added Vite dev server CORS support (ports 5173, 4173)
-- ✅ Backend API now starts correctly on http://localhost:5000
+-- ✅ Backend API now starts correctly on http://127.0.0.1:5001
 
 ### 2. Enhanced Development Workflow ✅
 - ✅ All scripts made executable with proper permissions
@@ -65,7 +65,7 @@ Visit: https://github.com/alann-s-mumbai/VTellTales-WebApp/settings/secrets/acti
 ./start-backend.sh
 
 # Test in another terminal:
-curl "http://localhost:5000/storyapi/StoryBook/getallstorytype"
+curl "http://127.0.0.1:5001/storyapi/StoryBook/getallstorytype"
 ```
 
 ### Full Stack Test:
@@ -75,7 +75,7 @@ curl "http://localhost:5000/storyapi/StoryBook/getallstorytype"
 
 # Visit:
 # Frontend: http://localhost:5173
-# Backend API: http://localhost:5000/swagger
+# Backend API: http://127.0.0.1:5001/swagger
 ```
 
 ## 📈 **NEXT PRIORITIES**
@@ -122,7 +122,7 @@ tail -f logs/backend.log
 tail -f logs/frontend.log
 
 # Test API
-curl http://localhost:5000/storyapi/StoryBook/getallstorytype
+curl http://127.0.0.1:5001/storyapi/StoryBook/getallstorytype
 ```
 
 ### Troubleshooting:

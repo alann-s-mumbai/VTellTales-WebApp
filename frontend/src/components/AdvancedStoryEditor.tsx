@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Image, Save, Eye, Users, Share2, MessageSquare, Undo, Redo, Palette, Type, BookOpen } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Image, Save, Eye, Users, Share2, MessageSquare, Undo, Redo } from 'lucide-react';
 
 interface StoryEditorProps {
   storyId?: string;
@@ -54,18 +54,29 @@ const AdvancedStoryEditor: React.FC<StoryEditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
+  const initializeCollaboration = useCallback(() => {
+    // WebSocket connection for real-time collaboration
+    // This would connect to your backend collaboration service
+    console.log('Initializing collaboration for story:', storyId);
+    
+    setCollaborators(prev =>
+      prev.length > 0
+        ? prev
+        : [{
+            id: storyId || 'local',
+            name: 'You',
+            position: 0,
+            color: '#3b82f6'
+          }]
+    );
+  }, [storyId]);
+
   useEffect(() => {
     if (collaborationEnabled && storyId) {
       // Initialize collaboration service
       initializeCollaboration();
     }
-  }, [collaborationEnabled, storyId]);
-
-  const initializeCollaboration = () => {
-    // WebSocket connection for real-time collaboration
-    // This would connect to your backend collaboration service
-    console.log('Initializing collaboration for story:', storyId);
-  };
+  }, [collaborationEnabled, storyId, initializeCollaboration]);
 
   const updateContent = (newContent: string) => {
     setEditorState(prev => {
@@ -88,8 +99,6 @@ const AdvancedStoryEditor: React.FC<StoryEditorProps> = ({
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
-    const range = selection.getRangeAt(0);
-    
     switch (format) {
       case 'bold':
         document.execCommand('bold');
@@ -189,28 +198,15 @@ const AdvancedStoryEditor: React.FC<StoryEditorProps> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (onSave && editorState.isModified) {
       onSave(editorState.content);
       setEditorState(prev => ({ ...prev, isModified: false }));
     }
-  };
+  }, [editorState, onSave]);
 
   const togglePreview = () => {
     setShowPreview(!showPreview);
-  };
-
-  const addComment = (position: number, comment: string) => {
-    const newComment = {
-      id: Date.now().toString(),
-      position,
-      text: comment,
-      author: 'Current User',
-      timestamp: new Date().toISOString(),
-      resolved: false
-    };
-    
-    setComments(prev => [...prev, newComment]);
   };
 
   // Auto-save functionality
@@ -222,7 +218,7 @@ const AdvancedStoryEditor: React.FC<StoryEditorProps> = ({
       
       return () => clearTimeout(autoSaveTimer);
     }
-  }, [editorState.content, editorState.isModified]);
+  }, [editorState.isModified, handleSave]);
 
   const toolbarButtons = [
     {

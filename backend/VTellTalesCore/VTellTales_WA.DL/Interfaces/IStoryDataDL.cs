@@ -30,5 +30,10 @@ namespace VTellTales_WA.DL.Interfaces
         List<StoryCommentDTO> Getfanclub(string userID);
     ProfileDataDTO? GetStoryUser(int storyid);
         int deletemystory(int storyid, string userid);
+        // Collaboration management
+        System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> GetCollaborators(int storyId);
+        System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> AddCollaborator(VTellTales_WA.DTO.CollaboratorDTO collaborator);
+        System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> UpdateCollaborator(int storyId, string collaboratorId, VTellTales_WA.DTO.CollaboratorDTO collaborator);
+        System.Collections.Generic.List<VTellTales_WA.DTO.CollaboratorDTO> DeleteCollaborator(int storyId, string collaboratorId);
     }
 }

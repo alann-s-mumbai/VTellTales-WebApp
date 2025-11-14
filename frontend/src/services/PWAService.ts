@@ -1,3 +1,12 @@
+type SyncManagerLike = {
+  register(tag: string): Promise<void>;
+  getTags?(): Promise<string[]>;
+};
+
+type SyncCapableServiceWorkerRegistration = ServiceWorkerRegistration & {
+  sync: SyncManagerLike;
+};
+
 // PWA Service Worker Registration and Management
 export class PWAService {
   private static instance: PWAService;
@@ -35,6 +44,13 @@ export class PWAService {
         console.error('Service Worker registration failed:', error);
       }
     }
+  }
+
+  private isSyncCapableRegistration(
+    registration: ServiceWorkerRegistration
+  ): registration is SyncCapableServiceWorkerRegistration {
+    const candidate = registration as { sync?: SyncManagerLike };
+    return typeof candidate.sync?.register === 'function';
   }
 
   private handleServiceWorkerUpdate(): void {
@@ -82,9 +98,10 @@ export class PWAService {
   }
 
   async triggerBackgroundSync(): Promise<void> {
-    if (this.swRegistration?.sync) {
+    const registration = this.swRegistration;
+    if (registration && this.isSyncCapableRegistration(registration)) {
       try {
-        await this.swRegistration.sync.register('background-sync-stories');
+        await registration.sync.register('background-sync-stories');
         console.log('Background sync registered');
       } catch (error) {
         console.error('Background sync registration failed:', error);

@@ -51,7 +51,7 @@ VTellTales-WebApp/
 ## 🚀 **PRODUCTION READY FEATURES**
 
 ### ✅ **Development Environment**
-- **Backend API**: Runs on http://localhost:5000 (fixed startup issues)
+- **Backend API**: Runs on http://127.0.0.1:5001 (fixed startup issues)
 - **Frontend**: Runs on http://localhost:3000 (Vite dev server)
 - **Auto Health Checks**: Scripts wait for services to be ready
 - **Process Management**: Clean startup/shutdown with PID tracking
@@ -76,7 +76,7 @@ VTellTales-WebApp/
 - ✅ `npm run setup` - Project initialization works perfectly
 - ✅ `npm run dev` - Full environment starts both services
 - ✅ `npm run stop` - Clean shutdown of all processes
-- ✅ Backend API responds on http://localhost:5000
+- ✅ Backend API responds on http://127.0.0.1:5001
 - ✅ Frontend serves on http://localhost:3000
 - ✅ Process management with PID tracking
 - ✅ Automated port conflict resolution

@@ -1,25 +1,45 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { act } from 'react'
+vi.mock('../services/api', () => ({
+  fetchStoriesByPage: vi.fn(),
+  fetchStoryTypes: vi.fn()
+}))
+import { fetchStoriesByPage, fetchStoryTypes } from '../services/api'
 import { HomePage } from '../pages/HomePage'
 
-// Mock the API module
-vi.mock('../services/api', () => ({
-  fetchStoriesByPage: vi.fn(() => Promise.resolve([
-    {
-      storyId: 'test-1',
-      title: 'Test Story 1',
-      description: 'A test story description',
-      createdDate: '2023-11-13T00:00:00Z',
-      storyTypeName: 'Adventure',
-      authorName: 'Test Author'
-    }
-  ])),
-  fetchStoryTypes: vi.fn(() => Promise.resolve([
-    { id: '1', typeName: 'Adventure', description: 'Adventure stories' },
-    { id: '2', typeName: 'Fantasy', description: 'Fantasy stories' }
-  ]))
-}))
+const fetchStoriesByPageMock = vi.mocked(fetchStoriesByPage)
+const fetchStoryTypesMock = vi.mocked(fetchStoryTypes)
+
+const mockStories = [
+  {
+    userid: 'user-1',
+    storyid: 1,
+    storytitle: 'Test Story 1',
+    storydesc: 'A test story description',
+    spages: 12,
+    storylike: 8,
+    storyview: 25,
+    storycomment: 3,
+    storyimg: undefined,
+    storystatus: 1,
+    storypages: 12,
+    storytype: 'Adventure',
+    storytypeid: 1,
+    createdate: '2023-11-13T00:00:00Z',
+    followerid: 'author-1',
+    followername: 'Test Author',
+    followingid: undefined,
+    followingname: undefined,
+    islike: false
+  }
+]
+
+const mockStoryTypes = [
+  { stid: 1, sttype: 'Adventure' },
+  { stid: 2, sttype: 'Fantasy' }
+]
 
 const renderWithRouter = (component: React.ReactElement) => {
   return render(
@@ -29,38 +49,56 @@ const renderWithRouter = (component: React.ReactElement) => {
   )
 }
 
+const renderHomePage = async () => {
+  await act(async () => {
+    renderWithRouter(<HomePage />)
+  })
+}
+
+beforeEach(() => {
+  fetchStoriesByPageMock.mockResolvedValue(mockStories)
+  fetchStoryTypesMock.mockResolvedValue(mockStoryTypes)
+})
+
+afterEach(() => {
+  vi.clearAllMocks()
+})
+
 describe('HomePage', () => {
   it('renders the page title and search functionality', async () => {
-    renderWithRouter(<HomePage />)
-    
-    // Check if the search input is present
+    await renderHomePage()
+
     expect(screen.getByPlaceholderText(/search stories/i)).toBeInTheDocument()
-    
-    // Check if filter buttons are present
-    await waitFor(() => {
-      expect(screen.getByText(/all stories/i)).toBeInTheDocument()
-    })
+    expect(screen.getByText(/all stories/i)).toBeInTheDocument()
   })
 
-  it('displays loading state initially', () => {
-    renderWithRouter(<HomePage />)
+  it('displays loading state initially', async () => {
+    const deferredStories = createDeferred<typeof mockStories>()
+    const deferredTypes = createDeferred<typeof mockStoryTypes>()
     
-    // Should show some loading indication
-    expect(screen.getByText(/loading/i) || screen.getByTestId('loading-spinner')).toBeDefined()
+    fetchStoriesByPageMock.mockReturnValueOnce(deferredStories.promise)
+    fetchStoryTypesMock.mockReturnValueOnce(deferredTypes.promise)
+
+    renderWithRouter(<HomePage />)
+
+    const loadingIndicators = screen.getAllByText(/loading stories/i)
+    expect(loadingIndicators.length).toBeGreaterThan(0)
+
+    await act(async () => {
+      deferredStories.resolve(mockStories)
+      deferredTypes.resolve(mockStoryTypes)
+    })
   })
 
   it('displays stories after loading', async () => {
-    renderWithRouter(<HomePage />)
+    await renderHomePage()
     
-    // Wait for stories to load
-    await waitFor(() => {
-      expect(screen.getByText('Test Story 1')).toBeInTheDocument()
-    })
+    expect(screen.getByText('Test Story 1')).toBeInTheDocument()
   })
 
   it('handles search input changes', async () => {
-    renderWithRouter(<HomePage />)
-    
+    await renderHomePage()
+
     const searchInput = screen.getByPlaceholderText(/search stories/i)
     expect(searchInput).toBeInTheDocument()
     
@@ -68,3 +106,16 @@ describe('HomePage', () => {
     expect(searchInput).toHaveAttribute('type', 'text')
   })
 })
+
+function createDeferred<T>() {
+  let resolveFn!: (value: T) => void
+  const promise = new Promise<T>((resolve) => {
+    resolveFn = resolve
+  })
+  return {
+    promise,
+    resolve(value: T) {
+      resolveFn(value)
+    }
+  }
+}

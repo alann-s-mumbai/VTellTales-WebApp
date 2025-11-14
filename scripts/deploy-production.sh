@@ -14,7 +14,6 @@ echo "==========================================="
 # Configuration
 PRODUCTION_HOST="94.136.189.179"
 FRONTEND_DOMAIN="webapp.vtelltales.com"
-BACKEND_DOMAIN="webapi.vtelltales.com"
 SSH_USER="root"
 SSH_KEY_PATH="$HOME/.ssh/vtelltales_deploy"
 
@@ -82,16 +81,20 @@ cat > deployment/server-deploy.sh << 'EOF'
 echo "🚀 VTellTales Server Deployment Starting..."
 
 # Create application directories
-sudo mkdir -p /var/www/webapp.vtelltales.com/{app,logs}
-sudo mkdir -p /var/www/webapi.vtelltales.com/{app,logs}
+sudo mkdir -p /var/www/webapp.vtelltales.com/app
+sudo mkdir -p /var/www/webapp.vtelltales.com/api
+sudo mkdir -p /var/www/webapp.vtelltales.com/data
+sudo mkdir -p /var/www/webapp.vtelltales.com/admin
+sudo mkdir -p /var/www/webapp.vtelltales.com/logs/app
+sudo mkdir -p /var/www/webapp.vtelltales.com/logs/api
 
 # Backup existing deployment
 if [ -d "/var/www/webapp.vtelltales.com/app" ]; then
-    sudo tar -czf "/var/www/webapp.vtelltales.com/backup-$(date +%Y%m%d-%H%M%S).tar.gz" -C /var/www/webapp.vtelltales.com app
+    sudo tar -czf "/var/www/webapp.vtelltales.com/backup-app-$(date +%Y%m%d-%H%M%S).tar.gz" -C /var/www/webapp.vtelltales.com app
 fi
 
-if [ -d "/var/www/webapi.vtelltales.com/app" ]; then
-    sudo tar -czf "/var/www/webapi.vtelltales.com/backup-$(date +%Y%m%d-%H%M%S).tar.gz" -C /var/www/webapi.vtelltales.com app
+if [ -d "/var/www/webapp.vtelltales.com/api" ]; then
+    sudo tar -czf "/var/www/webapp.vtelltales.com/backup-api-$(date +%Y%m%d-%H%M%S).tar.gz" -C /var/www/webapp.vtelltales.com api
 fi
 
 # Deploy frontend
@@ -101,14 +104,12 @@ sudo tar -xzf frontend-v1.1.0.tar.gz -C /var/www/webapp.vtelltales.com/app/
 
 # Deploy backend
 echo "🔧 Deploying backend..."
-sudo rm -rf /var/www/webapi.vtelltales.com/app/*
-sudo tar -xzf backend-v1.1.0.tar.gz -C /var/www/webapi.vtelltales.com/app/
+sudo rm -rf /var/www/webapp.vtelltales.com/api/*
+sudo tar -xzf backend-v1.1.0.tar.gz -C /var/www/webapp.vtelltales.com/api/
 
 # Set permissions
 sudo chown -R www-data:www-data /var/www/webapp.vtelltales.com/
-sudo chown -R www-data:www-data /var/www/webapi.vtelltales.com/
 sudo chmod -R 755 /var/www/webapp.vtelltales.com/
-sudo chmod -R 755 /var/www/webapi.vtelltales.com/
 
 # Create systemd service for backend
 sudo tee /etc/systemd/system/vtelltales-api.service > /dev/null << 'SYSTEMD_EOF'
@@ -118,14 +119,14 @@ After=network.target
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/dotnet /var/www/webapi.vtelltales.com/app/VTellTales_WA.API.dll
+ExecStart=/usr/bin/dotnet /var/www/webapp.vtelltales.com/api/VTellTales_WA.API.dll
 Restart=always
 RestartSec=5
 User=www-data
 Group=www-data
 Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=ASPNETCORE_URLS=http://localhost:5000
-WorkingDirectory=/var/www/webapi.vtelltales.com/app
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5001
+WorkingDirectory=/var/www/webapp.vtelltales.com/api
 KillSignal=SIGINT
 TimeoutStopSec=30
 
@@ -135,75 +136,57 @@ SYSTEMD_EOF
 
 # Configure Nginx
 sudo tee /etc/nginx/sites-available/vtelltales > /dev/null << 'NGINX_EOF'
-# Frontend - webapp.vtelltales.com
 server {
     listen 80;
     server_name webapp.vtelltales.com;
-    root /var/www/webapp.vtelltales.com/app;
-    index index.html;
+    root /var/www/webapp.vtelltales.com;
 
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
     add_header X-XSS-Protection "1; mode=block";
 
-    # Handle React Router
-    location / {
-        try_files $uri $uri/ /index.html;
+    # Redirect base to app dashboard
+    location = / {
+        return 302 /app/;
     }
 
-    # Static assets caching
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+    # SPA application
+    location /app/ {
+        try_files $uri $uri/ /app/index.html;
+    }
+
+    # Admin panel placeholder
+    location /admin/ {
+        try_files $uri $uri/ /admin/index.html;
+    }
+
+    # Static data files
+    location /data/ {
+        alias /var/www/webapp.vtelltales.com/data/;
+        autoindex off;
+        add_header Cache-Control "public, max-age=31536000";
     }
 
     # API proxy to backend
     location /api/ {
-        proxy_pass http://localhost:5000/;
+        proxy_pass http://127.0.0.1:5001/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # CORS headers
+
         add_header Access-Control-Allow-Origin "https://webapp.vtelltales.com" always;
         add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization" always;
-        
+
         if ($request_method = 'OPTIONS') {
             return 204;
         }
     }
 
-    error_log /var/www/webapp.vtelltales.com/logs/error.log;
-    access_log /var/www/webapp.vtelltales.com/logs/access.log;
-}
-
-# Backend API - webapi.vtelltales.com (legacy support)
-server {
-    listen 80;
-    server_name webapi.vtelltales.com;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # CORS headers
-        add_header Access-Control-Allow-Origin "https://webapp.vtelltales.com" always;
-        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization" always;
-        
-        if ($request_method = 'OPTIONS') {
-            return 204;
-        }
-    }
-
-    error_log /var/www/webapi.vtelltales.com/logs/error.log;
-    access_log /var/www/webapi.vtelltales.com/logs/access.log;
+    error_log /var/www/webapp.vtelltales.com/logs/app/error.log;
+    access_log /var/www/webapp.vtelltales.com/logs/app/access.log;
 }
 NGINX_EOF
 
@@ -222,15 +205,14 @@ sleep 5
 echo "✅ Deployment completed successfully!"
 echo ""
 echo "🌐 Services:"
-echo "   Frontend: http://webapp.vtelltales.com"
-echo "   Backend:  http://webapi.vtelltales.com"
-echo "   API:      http://webapp.vtelltales.com/api"
+echo "   Frontend: https://webapp.vtelltales.com/app"
+echo "   API:      https://webapp.vtelltales.com/api"
 echo ""
 echo "📊 Service Status:"
 sudo systemctl status vtelltales-api --no-pager -l
 echo ""
 echo "🧪 Testing endpoints..."
-curl -f http://localhost:5000 || echo "Backend not responding"
+curl -f http://127.0.0.1:5001/health || echo "Backend not responding"
 EOF
 
 chmod +x deployment/server-deploy.sh
@@ -251,13 +233,12 @@ echo "🎉 Production Deployment Complete!"
 echo "=================================="
 echo ""
 echo "🌐 Application URLs:"
-echo "   Frontend: http://webapp.vtelltales.com"
-echo "   Backend:  http://webapi.vtelltales.com"
-echo "   API:      http://webapp.vtelltales.com/api"
+echo "   Frontend: https://webapp.vtelltales.com/app"
+echo "   API:      https://webapp.vtelltales.com/api"
 echo ""
 echo "🧪 Test Commands:"
-echo "   curl http://webapp.vtelltales.com"
-echo "   curl http://webapp.vtelltales.com/api/storyapi/StoryBook/getallstorytype"
+echo "   curl https://webapp.vtelltales.com/app/"
+echo "   curl https://webapp.vtelltales.com/api/storyapi/StoryBook/getallstorytype"
 echo ""
 echo "📊 Monitor Logs:"
 echo "   ssh -i $SSH_KEY_PATH $SSH_USER@$PRODUCTION_HOST"

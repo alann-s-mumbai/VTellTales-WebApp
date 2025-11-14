@@ -1,7 +1,7 @@
 # API Documentation
 
 ## Base URL
-- **Development**: `http://localhost:5000`
+- **Development**: `http://127.0.0.1:5001`
 - **Production**: `https://webapp.vtelltales.com/api`
 
 ## Authentication

@@ -78,7 +78,7 @@ namespace VTellTales_WA.API.Controllers
                     {
                         Title = "Image Message Title from.net Image",
                         Body = "Image Message Body from vtell tales",
-                        ImageUrl = "https://data.vtelltales.com/appImages/user-default.png",
+                        ImageUrl = "https://webapp.vtelltales.com/data/appImages/user-default.png",
                     },
                     Token = "cxzUxLjBQtOWkacgfsSOpW:APA91bE8xykX2UfmkNBxEeNtqu-8ACLXVm2dY77YZKFHx0h5u2wcNH19ErTHZ0PKgnrNr8UHxuWXJ3IhJvFgmadJAkKEQmOWiQHIPuwHsGaN0aRJ79haapfjCRZ-0mt1uX7MKHFu-yBT"
                     //Token = utoken, // "dCNS_a7IQYelsih7ikCJmJ:APA91bHzIiV1FQCFppr1ZZirBwZVzUkZObisJVhDMBwrsDvMnUWQZKF5blgOhJfSYRowMGTH3rvbel31T6VuWl-NfNMo_ghIEKR3yivtIT1Tlvv_a6_zfsz1g4OgE3q4EjHCu2zwzGHa",

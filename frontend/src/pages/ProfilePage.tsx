@@ -4,8 +4,7 @@ import {
   fetchProfile,
   fetchUnreadNotificationCount,
   NotificationData,
-  ProfileData,
-  DEFAULT_USER_ID
+  ProfileData
 } from '../services/api'
 
 type Status = 'idle' | 'loading' | 'error'
@@ -16,19 +15,26 @@ export function ProfilePage() {
   const [unreadCount, setUnreadCount] = useState<number | null>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
+  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null
 
   useEffect(() => {
     let cancelled = false
 
     async function loadProfile() {
+      if (!userId) {
+        setStatus('error')
+        setError('You must be signed in to view your profile.')
+        return
+      }
+
       setStatus('loading')
       setError(null)
 
       try {
         const [profileData, notificationData, unread] = await Promise.all([
-          fetchProfile(DEFAULT_USER_ID),
-          fetchNotifications(DEFAULT_USER_ID),
-          fetchUnreadNotificationCount(DEFAULT_USER_ID)
+          fetchProfile(userId),
+          fetchNotifications(userId),
+          fetchUnreadNotificationCount(userId)
         ])
 
         if (!cancelled) {
@@ -50,7 +56,7 @@ export function ProfilePage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [userId])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 px-4 py-12">
@@ -76,7 +82,7 @@ export function ProfilePage() {
           </div>
         )}
 
-        {profile && (
+        {userId && profile && (
           <section className="rounded-[32px] bg-white shadow-xl overflow-hidden">
             <div className="flex flex-col gap-6 p-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="flex items-center gap-5">
