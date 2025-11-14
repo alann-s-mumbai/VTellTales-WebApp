@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  node-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Run root checks if package.json exists
+        run: |
+          if [ -f package.json ]; then
+            echo "Root package.json found — installing and testing"
+            npm ci || npm install
+            if npm run | grep -q "test"; then npm test; else echo "No root test script"; fi
+          else
+            echo "No root package.json"
+          fi
+
+      - name: Run frontend checks if present
+        run: |
+          if [ -d frontend ] && [ -f frontend/package.json ]; then
+            echo "frontend detected — running install & test"
+            cd frontend
+            npm ci || npm install
+            if npm run | grep -q "test"; then npm test; else echo "No frontend test script"; fi
+          else
+            echo "No frontend checks"
+          fi
+
+      - name: Run admin checks if present
+        run: |
+          if [ -d admin ] && [ -f admin/package.json ]; then
+            echo "admin detected — running install & test"
+            cd admin
+            npm ci || npm install
+            if npm run | grep -q "test"; then npm test; else echo "No admin test script"; fi
+          else
+            echo "No admin checks"
+          fi
